@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Manifest AI Agent Portfolio",
-    "subtitle": "DeepDelve · DeepProbe — Enterprise Agentic AI",
+    "title": "Manifest AI Workspace 3.0 Agent Hub",
+    "subtitle": "Enterprise Agentic AI",
     "contact": "www.manifestai.com",
     "generatedAt": "29 Jun 2026",
     "sourceFile": "Manifest_AI_Agents_Inventory.xlsx",
@@ -95,7 +95,6 @@
     {
       "id": "CAT-01",
       "name": "Document Intelligence & Extraction",
-      "productLine": "DeepDelve",
       "industries": [
         "Banking",
         "Lending",
@@ -131,7 +130,6 @@
     {
       "id": "CAT-02",
       "name": "Financial Analysis & Underwriting",
-      "productLine": "DeepDelve",
       "industries": [
         "Banking",
         "Mortgage Lending",
@@ -163,7 +161,6 @@
     {
       "id": "CAT-03",
       "name": "Billing & Reconciliation Automation",
-      "productLine": "DeepDelve",
       "industries": [
         "Banking",
         "Fintech",
@@ -195,7 +192,6 @@
     {
       "id": "CAT-04",
       "name": "Knowledge Discovery & Search",
-      "productLine": "DeepProbe",
       "industries": [
         "Government",
         "Defense",
@@ -227,7 +223,6 @@
     {
       "id": "CAT-05",
       "name": "Content Intelligence & Media",
-      "productLine": "DeepProbe",
       "industries": [
         "Media",
         "Publishing",
@@ -251,7 +246,6 @@
     {
       "id": "CAT-06",
       "name": "Government & Program Management",
-      "productLine": "DeepProbe",
       "industries": [
         "Government",
         "Public Health",
@@ -271,7 +265,6 @@
     {
       "id": "CAT-07",
       "name": "Horizontal Agents",
-      "productLine": "Cross-Platform",
       "industries": [],
       "deployments": [],
       "agentCount": 6,
@@ -280,7 +273,6 @@
     {
       "id": "CAT-08",
       "name": "BFSI",
-      "productLine": "DeepDelve",
       "industries": [],
       "deployments": [],
       "agentCount": 2,
@@ -289,7 +281,6 @@
     {
       "id": "CAT-09",
       "name": "ERP & Back-Office Finance",
-      "productLine": "DeepDelve",
       "industries": [],
       "deployments": [],
       "agentCount": 2,
@@ -298,7 +289,6 @@
     {
       "id": "CAT-10",
       "name": "Construction & Field Operations",
-      "productLine": "Cross-Platform",
       "industries": [],
       "deployments": [],
       "agentCount": 15,
@@ -307,7 +297,6 @@
     {
       "id": "CAT-11",
       "name": "Procurement & Supply Chain",
-      "productLine": "Cross-Platform",
       "industries": [],
       "deployments": [],
       "agentCount": 1,
@@ -329,8 +318,7 @@
       "metricPct": 85,
       "description": "AI-powered document extraction agent that automates data entry from invoices, bank statements, and loan documents. Replaces legacy OCR systems (70-85% accuracy, 3-4 day turnaround) with intelligent extraction achieving 98%+ accuracy in 2-4 hours — an 85% reduction in processing time.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepDelve"
+      "status": "Live"
     },
     {
       "id": "AGT-02",
@@ -346,8 +334,7 @@
       "metricPct": null,
       "description": "Format-agnostic invoice processing agent that automatically extracts, validates, and structures data from any invoice format. Eliminates 3-4 day manual processing cycles and reduces manual validation from 20-30% to near-zero, delivering >98% extraction accuracy for AP workflows.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepDelve"
+      "status": "Live"
     },
     {
       "id": "AGT-03",
@@ -363,8 +350,7 @@
       "metricPct": 90,
       "description": "Automated bank statement analysis agent that ingests statements in any format, extracts transaction data, and integrates directly with ERP/LOS systems. Replaces format-specific tools and high processing costs, reducing manual validation effort by 90%.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepDelve"
+      "status": "Live"
     },
     {
       "id": "AGT-04",
@@ -380,8 +366,7 @@
       "metricPct": 70,
       "description": "High-throughput credit document processing agent that clears 72-96 hour processing backlogs. Reduces error rates from 15-25% to near-zero and cuts processing time by 85%, with 70% overall cost reduction in credit asset documentation workflows.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepDelve"
+      "status": "Live"
     },
     {
       "id": "AGT-05",
@@ -397,8 +382,7 @@
       "metricPct": null,
       "description": "Scalable document processing agent capable of handling 100,000+ documents per month. Overcomes the inability of legacy OCR systems to scale during peak periods, providing elastic throughput without proportional staffing increases.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepDelve"
+      "status": "Live"
     },
     {
       "id": "AGT-06",
@@ -414,8 +398,7 @@
       "metricPct": 85,
       "description": "AI-driven cashflow analysis agent for lending underwriters. Transforms the 6-8 hour manual loan application review process into a 45-90 minute automated workflow, delivering 85% reduction in analysis time through intelligent cashflow modeling and automated data extraction.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepDelve"
+      "status": "Live"
     },
     {
       "id": "AGT-07",
@@ -431,8 +414,7 @@
       "metricPct": 70,
       "description": "Intelligent underwriting agent that automates debt service coverage ratio calculations and risk recommendations. Compresses 14-21 day manual approval cycles to 3-5 days (70% reduction) by replacing spreadsheet-based workflows with AI-driven decisioning.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepDelve"
+      "status": "Live"
     },
     {
       "id": "AGT-08",
@@ -448,8 +430,7 @@
       "metricPct": 40,
       "description": "Portfolio-wide risk assessment agent that standardizes credit risk scoring and enhances fraud detection. Replaces inconsistent manual scoring with AI-driven consistent evaluations and pattern-based fraud identification, increasing underwriter productivity by 40%.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepDelve"
+      "status": "Live"
     },
     {
       "id": "AGT-09",
@@ -465,8 +446,7 @@
       "metricPct": null,
       "description": "Automated credit memo generation agent that eliminates manual preparation bottlenecks. Transforms backlogged, labor-intensive credit memo workflows into streamlined automated generation with consistent formatting and risk-appropriate content.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepDelve"
+      "status": "Live"
     },
     {
       "id": "AGT-10",
@@ -482,8 +462,7 @@
       "metricPct": null,
       "description": "Advanced financial analysis agent with AI-powered fraud pattern identification. Enhances limited legacy fraud detection capabilities with sophisticated pattern recognition and anomaly detection across financial data sets.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepDelve"
+      "status": "Live"
     },
     {
       "id": "AGT-11",
@@ -499,8 +478,7 @@
       "metricPct": 90,
       "description": "Multi-partner billing automation agent that handles complex fee structures across partner ecosystems. Reduces monthly reconciliation effort from 40-60 hours of manual work to 4-6 hours of oversight — a 90% time reduction.",
       "internalComment": "",
-      "status": "In Progress",
-      "productLine": "DeepDelve"
+      "status": "In Progress"
     },
     {
       "id": "AGT-12",
@@ -516,8 +494,7 @@
       "metricPct": 75,
       "description": "Batch billing creation agent that automates complex spreadsheet-dependent billing processes. Compresses 15-20 day billing cycles to 3-5 days (75% reduction) and produces ERP-ready outputs, eliminating manual spreadsheet dependencies.",
       "internalComment": "",
-      "status": "In Progress",
-      "productLine": "DeepDelve"
+      "status": "In Progress"
     },
     {
       "id": "AGT-13",
@@ -533,8 +510,7 @@
       "metricPct": 95,
       "description": "Intelligent payment reconciliation agent that matches and validates transactions across systems. Reduces billing error rates from 10-15% to less than 1% — a 95% error reduction — through automated cross-system validation.",
       "internalComment": "",
-      "status": "In Progress",
-      "productLine": "DeepDelve"
+      "status": "In Progress"
     },
     {
       "id": "AGT-14",
@@ -550,8 +526,7 @@
       "metricPct": null,
       "description": "Automated three-way matching agent that reconciles purchase orders, invoices, and receiving documents for accounts payable intelligence and audit compliance.",
       "internalComment": "",
-      "status": "In Progress",
-      "productLine": "DeepDelve"
+      "status": "In Progress"
     },
     {
       "id": "AGT-15",
@@ -567,8 +542,7 @@
       "metricPct": 95,
       "description": "Semantic search and knowledge discovery agent that indexes 10,000-50,000+ documents and enables natural language queries. Replaces 4-6 hour keyword-only document searches with instant semantic retrieval — a 95% reduction in search time.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-16",
@@ -584,8 +558,7 @@
       "metricPct": null,
       "description": "Intelligent topic and article search agent that unifies siloed document repositories into a single semantic knowledge base. Enables cross-document intelligence and indexes 20,000+ documents with full contextual understanding beyond simple keyword matching.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-17",
@@ -601,8 +574,7 @@
       "metricPct": null,
       "description": "Policy quality assurance agent that ensures compliance by tracking document currency, providing source citations, and flagging outdated policies. Supports 100+ concurrent users for enterprise-scale compliance verification.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-18",
@@ -618,8 +590,7 @@
       "metricPct": null,
       "description": "Secure on-premise knowledge management agent with natural language understanding. Provides systematic document retrieval from siloed repositories while maintaining data sovereignty through local deployment — ideal for regulated industries.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-19",
@@ -635,8 +606,7 @@
       "metricPct": null,
       "description": "Automated topic summarization agent for newsrooms and editorial teams. Reduces 60-70% of routine journalist tasks by automating content discovery and generating concise, publishable summaries — saving 50-60% of editorial time.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-20",
@@ -652,8 +622,7 @@
       "metricPct": null,
       "description": "Real-time grammar correction agent that replaces manual proofreading workflows. Delivers instant, context-aware grammar assistance to editorial teams, enabling 90% faster content review and freeing bandwidth for higher-value work.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-21",
@@ -669,8 +638,7 @@
       "metricPct": null,
       "description": "AI-powered paraphrasing and content repurposing agent that transforms time-intensive rewriting into one-click multi-format content generation. Enables rapid content adaptation across channels and audiences.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-22",
@@ -686,8 +654,7 @@
       "metricPct": null,
       "description": "Instant AI audio generation agent that replaces external audio services with 48-72 hour turnaround times. Produces broadcast-ready audio content on demand, eliminating vendor dependencies and accelerating multimedia publishing.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-23",
@@ -703,8 +670,7 @@
       "metricPct": null,
       "description": "Intelligent media report generation agent with advanced archive search capabilities. Replaces limited archive search with AI-powered intelligent retrieval, increasing time available for investigative journalism.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-24",
@@ -720,8 +686,7 @@
       "metricPct": null,
       "description": "Automated fact-checking agent that verifies claims against trusted sources in real time. Replaces manual fact-verification processes with AI-driven automated validation, improving editorial accuracy and speed.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-25",
@@ -737,8 +702,7 @@
       "metricPct": null,
       "description": "Automated email reporting agent that generates and distributes multi-format content reports. Eliminates manual email report generation, enabling consistent, scheduled delivery across stakeholder groups.",
       "internalComment": "",
-      "status": "Live",
-      "productLine": "DeepProbe"
+      "status": "Live"
     },
     {
       "id": "AGT-26",
@@ -754,8 +718,7 @@
       "metricPct": 90,
       "description": "Government financial analysis agent that consolidates data from 50+ agencies into real-time dashboards. Replaces 3-4 week manual report generation cycles with instant consolidated views — a 90% reduction in report generation time.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "DeepProbe"
+      "status": "Planned"
     },
     {
       "id": "AGT-27",
@@ -771,8 +734,7 @@
       "metricPct": null,
       "description": "Health data analysis agent that integrates disconnected financial and health program data across 50+ sources. Enables automated cross-program analysis combining health, finance, and infrastructure data with real-time multi-agency visibility.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "DeepProbe"
+      "status": "Planned"
     },
     {
       "id": "AGT-28",
@@ -788,8 +750,7 @@
       "metricPct": null,
       "description": "AI-powered spreadsheet and report generation agent for government oversight. Transforms 3-4 week national reporting cycles into automated executive report generation with built-in anomaly detection across cross-program data.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "DeepProbe"
+      "status": "Planned"
     },
     {
       "id": "AGT-29",
@@ -805,8 +766,7 @@
       "metricPct": null,
       "description": "Automated government document generation agent with AI-driven executive report creation. Accelerates intervention responses by providing faster, data-informed reporting for program management decision-making.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "DeepProbe"
+      "status": "Planned"
     },
     {
       "id": "AGT-30",
@@ -822,8 +782,7 @@
       "metricPct": null,
       "description": "Geospatial analysis agent that adds location-based intelligence to government program tracking. Enables geographic visualization of program performance, replacing manual analysis with interactive geospatial mapping and oversight capabilities.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "DeepProbe"
+      "status": "Planned"
     },
     {
       "id": "AGT-31",
@@ -839,8 +798,7 @@
       "metricPct": null,
       "description": "Digital signature and e-sign workflow agent that automates document signing processes across enterprise workflows, providing secure, auditable electronic signature capabilities.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-32",
@@ -856,8 +814,7 @@
       "metricPct": null,
       "description": "Cross-platform analytics agent that provides AI-powered data analysis, visualization, and insight generation across enterprise datasets for data-driven decision-making.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-33",
@@ -873,8 +830,7 @@
       "metricPct": 70,
       "description": "Intelligent workflow orchestration agent that automates document management system (DMS) processes, routing, approvals, and task assignments using AI-driven workflow logic.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-34",
@@ -890,8 +846,7 @@
       "metricPct": 60,
       "description": "AI-powered communications agent that automates internal and external messaging, notifications, and stakeholder communications across enterprise channels.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-35",
@@ -907,8 +862,7 @@
       "metricPct": 65,
       "description": "Enterprise content management agent that automates content creation, organization, versioning, and distribution across digital channels and repositories.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-36",
@@ -924,8 +878,7 @@
       "metricPct": 80,
       "description": "KYC and anti-money laundering compliance agent that automates document verification, PEP/sanctions screening, risk profiling, and suspicious transaction alerting. Streamlines regulatory compliance workflows for financial institutions.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "DeepDelve"
+      "status": "Planned"
     },
     {
       "id": "AGT-37",
@@ -941,8 +894,7 @@
       "metricPct": 75,
       "description": "End-to-end loan origination document agent that automates application document extraction, validation, and decisioning support for BFSI workflows. Accelerates loan processing by replacing manual document review with AI-powered data capture and compliance checks across the origination pipeline.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "DeepDelve"
+      "status": "Planned"
     },
     {
       "id": "AGT-38",
@@ -958,8 +910,7 @@
       "metricPct": 90,
       "description": "Automated data quality and cleansing agent that detects duplicates, standardizes formats, imputes missing values, and maintains master data hygiene. Ensures enterprise data reliability by continuously monitoring and remediating data integrity issues across systems.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-39",
@@ -975,8 +926,7 @@
       "metricPct": 80,
       "description": "Intelligent expense management agent that automates receipt extraction, policy compliance checking, auto-categorization, and reimbursement workflows. Eliminates manual expense processing by integrating AI-powered validation with ERP-ready output for seamless back-office finance operations.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "DeepDelve"
+      "status": "Planned"
     },
     {
       "id": "AGT-40",
@@ -992,8 +942,7 @@
       "metricPct": 85,
       "description": "AI-powered presentation generation agent that automates executive slide creation from cross-agency program data. Replaces 1-2 week manual presentation cycles with instant AI-generated outputs, ensuring consistent formatting and real-time data integration for government program oversight.",
       "internalComment": "",
-      "status": "Planned",
-      "productLine": "DeepProbe"
+      "status": "Planned"
     },
     {
       "id": "AGT-40A",
@@ -1009,8 +958,7 @@
       "metricPct": 85,
       "description": "Automated bank reconciliation agent that matches transactions between bank statements and the general ledger, flags unreconciled exceptions, and produces audit-ready reconciliation reports. Eliminates manual bank-to-GL matching, accelerates month-end close, and reduces reconciliation errors across enterprise banking relationships.",
       "internalComment": "",
-      "status": "In Progress",
-      "productLine": "DeepDelve"
+      "status": "In Progress"
     },
     {
       "id": "AGT-41",
@@ -1026,8 +974,7 @@
       "metricPct": 80,
       "description": "AI-powered opportunity scanning agent that monitors tender portals across sources and automatically captures, scores, and shortlists tenders by fit, value, and region. Eliminates manual portal monitoring and ensures no opportunities are missed.",
       "internalComment": "HL Landscapes / R1 Sprint 2",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-42",
@@ -1043,8 +990,7 @@
       "metricPct": 75,
       "description": "Automated quote building agent that generates itemised Bills of Quantities directly from scope documents, pulling historic rates and supplier pricing. Replaces manual spreadsheet-based estimating with AI-driven BoQ generation for faster, more accurate tender pricing.",
       "internalComment": "HL Landscapes / R1 Sprint 2",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-43",
@@ -1060,8 +1006,7 @@
       "metricPct": 70,
       "description": "Intelligent bid response agent that auto-completes compliance matrices, surfaces and reuses past winning responses, and flags gaps before submission. Transforms days-long manual bid writing into a streamlined, AI-assisted process that improves win rates and reduces effort.",
       "internalComment": "HL Landscapes / R1 Sprint 3",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-44",
@@ -1077,8 +1022,7 @@
       "metricPct": 85,
       "description": "Margin analysis agent that benchmarks pricing against historical and market rates, surfaces bid risk, and highlights margin exposure before submission. Ensures construction bids are competitively priced without sacrificing profitability.",
       "internalComment": "HL Landscapes / R1 Sprint 3",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-45",
@@ -1094,8 +1038,7 @@
       "metricPct": 90,
       "description": "Construction-focused contract management agent that manages the full lifecycle of customer and supplier contracts. Tracks terms, expiry dates, and compliance obligations automatically — reducing missed renewals and compliance risk across the project portfolio.",
       "internalComment": "HL Landscapes / R1 Sprint 4",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-46",
@@ -1111,8 +1054,7 @@
       "metricPct": 70,
       "description": "Construction procurement agent that automates purchase order creation, approval routing, and delivery tracking across subcontractors and suppliers. Eliminates manual PO administration and ensures procurement compliance on construction projects.",
       "internalComment": "HL Landscapes / R1 Sprint 4",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-47",
@@ -1128,8 +1070,7 @@
       "metricPct": 80,
       "description": "Payment claims management agent that detects scope changes early, auto-prices and routes change orders, and manages the full payment claims process. Reduces revenue leakage from missed variations and accelerates claims resolution on construction projects.",
       "internalComment": "HL Landscapes / R1 Sprint 4",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-48",
@@ -1145,8 +1086,7 @@
       "metricPct": 65,
       "description": "Resource scheduling agent that allocates crews and equipment across construction projects using AI optimisation. Balances workloads, resolves scheduling clashes, and captures time against cost centres — replacing manual rostering with intelligent field resource management.",
       "internalComment": "HL Landscapes / R2 Sprint 5",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-49",
@@ -1162,8 +1102,7 @@
       "metricPct": 90,
       "description": "Field progress tracking agent that captures geo-tagged site progress and compares plan vs actual in real time. Replaces retrospective manual reporting with live field visibility, enabling earlier intervention on delays and better project control.",
       "internalComment": "HL Landscapes / R2 Sprint 5",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-50",
@@ -1179,8 +1118,7 @@
       "metricPct": 85,
       "description": "Project cost monitoring agent that tracks actuals by cost centre in real time, alerts on overruns, and projects forecast-to-complete. Transforms reactive cost reporting into proactive cost control across the construction project portfolio.",
       "internalComment": "HL Landscapes / R1 Sprint 4",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-51",
@@ -1196,8 +1134,7 @@
       "metricPct": 90,
       "description": "Safety and compliance registers agent that automates incident capture, OHS register management, safety action tracking, and site-level compliance monitoring. Replaces manual paper-based registers with a fully auditable, AI-assisted safety management system for construction sites.",
       "internalComment": "HL Landscapes / R1 Sprint 4",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-52",
@@ -1213,8 +1150,7 @@
       "metricPct": 80,
       "description": "Construction invoice generation agent that converts milestones and timesheets into compliant invoices, automatically applying GST, retentions, and client branding. Eliminates manual invoice preparation errors and accelerates billing cycles for construction projects.",
       "internalComment": "HL Landscapes / R1 Sprint 4",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-53",
@@ -1230,8 +1166,7 @@
       "metricPct": 95,
       "description": "Xero and XPNA accounting integration agent that automatically pushes invoices and financial data from construction workflows to Xero. Eliminates manual re-entry, sync delays, and reconciliation errors between project management and accounting systems.",
       "internalComment": "HL Landscapes / R1 Sprint 4",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-54",
@@ -1247,8 +1182,7 @@
       "metricPct": 85,
       "description": "Construction cashflow forecasting agent that models inflows, outflows, and retentions against project milestones and maintains a rolling 13-week cashflow view. Replaces manual spreadsheet forecasting with an always-current, automated cashflow dashboard for construction finance.",
       "internalComment": "HL Landscapes / R1 Sprint 4",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-55",
@@ -1264,8 +1198,7 @@
       "metricPct": 90,
       "description": "Construction AP compliance and reconciliation agent that audits rates and anomalies pre-invoice, performs automated 2-way match across purchase orders and invoices, and queues exceptions for review. Reduces AP errors and ensures payment accuracy across construction subcontractor and supplier payments.",
       "internalComment": "HL Landscapes / R1 Sprint 4",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-56",
@@ -1281,8 +1214,7 @@
       "metricPct": 85,
       "description": "AI-powered supplier contract agent that extracts clauses, identifies obligations, tracks renewals, and flags risk across the supplier contract portfolio. Replaces manual filing and ad-hoc tracking with automated lifecycle management and proactive alerts.",
       "internalComment": "ERP Agent",
-      "status": "Planned",
-      "productLine": "Cross-Platform"
+      "status": "Planned"
     },
     {
       "id": "AGT-57",
@@ -1298,8 +1230,7 @@
       "metricPct": 80,
       "description": "Customer contract management agent that automates revenue term extraction, SLA monitoring, auto-renewal management, and compliance tracking across the customer contract portfolio. Prevents missed renewals and SLA breaches through continuous AI-driven contract oversight.",
       "internalComment": "ERP Agent",
-      "status": "Planned",
-      "productLine": "DeepDelve"
+      "status": "Planned"
     }
   ],
   "backlog": [
@@ -1341,7 +1272,7 @@
     },
     {
       "n": "5",
-      "name": "DeepDelve (Patch Mgmt)",
+      "name": "Patch Mgmt",
       "description": "??",
       "category": "Horizontal",
       "erpFlag": false,

@@ -11,6 +11,7 @@ already represented in the canonical tables above.
 """
 import argparse
 import datetime as dt
+import re
 import json
 import os
 import sys
@@ -23,24 +24,25 @@ except ImportError:
 DEFAULT_XLSX = "inventory/Manifest_AI_Agents_Inventory.xlsx"
 DEFAULT_OUT = "data/data.json"
 
-KNOWN_PRODUCT_LINES = {"DeepDelve", "DeepProbe", "Cross-Platform"}
-
-# Product line for categories that are not present in the Master Data table
-# (the source sheet only maps CAT-01..CAT-09).
-PRODUCT_LINE_FALLBACK = {
-    "CAT-10": "Cross-Platform",  # Construction & Field Operations
-    "CAT-11": "Cross-Platform",  # Procurement & Supply Chain
-}
-
 LIVE_HINTS = ("user", "client", "document", "progress", "live")
 PLANNED_HINTS = ("to be deployed", "in development", "tbd", "planned")
 
 
+# Retired sub-brand names that must not surface anywhere in the dashboard.
+_RETIRED_BRANDS = re.compile(r"\s*\bDeep(?:Delve|Probe)\b\s*")
+
+
 def s(v):
-    """Stringify a cell, trimming whitespace; None -> ''."""
+    """Stringify a cell, trim whitespace, and scrub retired sub-brand names."""
     if v is None:
         return ""
-    return str(v).strip()
+    t = str(v).strip()
+    if "Deep" in t:
+        t = _RETIRED_BRANDS.sub(" ", t).strip()
+        m = re.fullmatch(r"\((.*)\)", t)   # e.g. "(Patch Mgmt)" -> "Patch Mgmt"
+        if m:
+            t = m.group(1).strip()
+    return t
 
 
 def normalize_metric_value(raw):
@@ -73,8 +75,14 @@ def deployment_status(detail_blob):
 
 
 def parse_master_data(ws):
-    """Return (product_lines, industries, deployments_by_cat)."""
-    product_lines = {}            # CategoryID -> product line
+    """Return (category_names, industries, deployments_by_cat).
+
+    In Table 1 the first row for a CategoryID is its definition (its name in
+    column B); any later rows that repeat the CategoryID carry an industry in
+    column C. (The third column of the definition row is a legacy field that is
+    no longer used.)
+    """
+    category_names = {}           # CategoryID -> Category Name
     industries = {}               # CategoryID -> [industry, ...]
     deployments = {}              # CategoryID -> [{client, details}, ...]
     section = None
@@ -89,8 +97,8 @@ def parse_master_data(ws):
         if c0 in ("CategoryID", "DeploymentID") or not c0:
             continue
         if section == "cat" and c0.startswith("CAT-"):
-            if c2 in KNOWN_PRODUCT_LINES:
-                product_lines.setdefault(c0, c2)
+            if c0 not in category_names:
+                category_names[c0] = c1     # first occurrence = definition
             elif c2:
                 industries.setdefault(c0, [])
                 if c2 not in industries[c0]:
@@ -99,7 +107,7 @@ def parse_master_data(ws):
             deployments.setdefault(c1, []).append(
                 {"client": c2, "details": c3}
             )
-    return product_lines, industries, deployments
+    return category_names, industries, deployments
 
 
 def parse_agents(ws):
@@ -188,13 +196,13 @@ def parse_summary(ws):
 
 def build(xlsx_path):
     wb = openpyxl.load_workbook(xlsx_path, data_only=True)
-    product_lines, industries, deployments = parse_master_data(wb["Master Data"])
+    md_cat_names, industries, deployments = parse_master_data(wb["Master Data"])
     agents, inv_cat_names = parse_agents(wb["Agent Inventory Live"])
     backlog = parse_backlog(wb["Agents Backlog"])
     kpis, sectors, roi, diffs = parse_summary(wb["Summary Dashboard"])
 
     # Category universe = everything referenced anywhere.
-    cat_ids = set(inv_cat_names) | set(product_lines) | set(industries) | set(deployments)
+    cat_ids = set(inv_cat_names) | set(md_cat_names) | set(industries) | set(deployments)
     agents_by_cat = {}
     for a in agents:
         agents_by_cat.setdefault(a["categoryId"], 0)
@@ -204,28 +212,25 @@ def build(xlsx_path):
     for cid in sorted(cat_ids):
         deps = deployments.get(cid, [])
         status = deployment_status(" ".join(d["client"] + " " + d["details"] for d in deps)) if deps else "Planned"
-        pl = product_lines.get(cid) or PRODUCT_LINE_FALLBACK.get(cid, "Cross-Platform")
         categories.append({
             "id": cid,
-            "name": inv_cat_names.get(cid, cid),
-            "productLine": pl,
+            "name": inv_cat_names.get(cid) or md_cat_names.get(cid, cid),
             "industries": industries.get(cid, []),
             "deployments": deps,
             "agentCount": agents_by_cat.get(cid, 0),
             "status": status,
         })
 
-    # Tag each agent with its category's deployment status & product line.
+    # Tag each agent with its category's deployment status.
     cat_lookup = {c["id"]: c for c in categories}
     for a in agents:
         c = cat_lookup.get(a["categoryId"])
         a["status"] = c["status"] if c else "Planned"
-        a["productLine"] = c["productLine"] if c else "Cross-Platform"
 
     return {
         "meta": {
-            "title": "Manifest AI Agent Portfolio",
-            "subtitle": "DeepDelve · DeepProbe — Enterprise Agentic AI",
+            "title": "Manifest AI Workspace 3.0 Agent Hub",
+            "subtitle": "Enterprise Agentic AI",
             "contact": "www.manifestai.com",
             "generatedAt": dt.datetime.now().strftime("%d %b %Y"),
             "sourceFile": os.path.basename(xlsx_path),

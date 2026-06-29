@@ -1,4 +1,4 @@
-# Manifest AI Agent Hub — Interactive Inventory Dashboard
+# Manifest AI Workspace 3.0 Agent Hub — Interactive Inventory Dashboard
 
 An interactive, shareable dashboard of the Manifest AI agent portfolio,
 driven by the Excel inventory workbook as the single source of truth.
@@ -17,12 +17,10 @@ and charts baked in and **zero external dependencies**. You can:
 - **Agents** — searchable, filterable card grid (or table) with each agent's
   business function, problem, **Before → After** states, headline metric, and an
   expandable description.
-- **Filters** — Product line (DeepDelve / DeepProbe / Cross-Platform), deployment
-  status (Live / In Progress / Planned), and category. Filter state is encoded in the
-  URL hash, so a filtered view is itself a shareable link.
+- **Filters** — deployment status (Live / In Progress / Planned) and category. Filter
+  state is encoded in the URL hash, so a filtered view is itself a shareable link.
 - **Categories** — per-category panels with industries, agents, and live-deployment clients.
-- **Insights** — charts: agents by category, by product line, by status, and live
-  deployments by category.
+- **Insights** — charts: agents by category, by status, and live deployments by category.
 - **Roadmap** — the backlog grouped by category with go-live sprints (**internal view only**).
 - **ROI & Differentiators** — the ROI metrics table and key differentiators.
 - **Export** — Print / Save as PDF, and Download CSV of the current filtered set.
@@ -68,7 +66,7 @@ The converter reads these sheets (others are treated as working copies and ignor
 
 | Sheet | Used for |
 |-------|----------|
-| `Master Data` | Categories → product line, industries, and live deployments |
+| `Master Data` | Categories, industries, and live deployments |
 | `Agent Inventory Live` | The 58 agents (before/after, metric, description, internal notes) |
 | `Agents Backlog` | Roadmap (internal) |
 | `Summary Dashboard` | KPIs, ROI metrics, key differentiators |
@@ -76,8 +74,7 @@ The converter reads these sheets (others are treated as working copies and ignor
 Notes / caveats:
 
 - Categories `CAT-10` (Construction & Field Operations) and `CAT-11` (Procurement &
-  Supply Chain) are not in `Master Data`; their product line defaults to *Cross-Platform*
-  (override in `PRODUCT_LINE_FALLBACK` in `build/convert.py`).
+  Supply Chain) are not in `Master Data`; they are picked up from `Agent Inventory Live`.
 - The **Internal view toggle is cosmetic, not a security boundary** — anyone can edit the
   URL. Keep genuinely sensitive notes out of the workbook columns that feed the dashboard.
 

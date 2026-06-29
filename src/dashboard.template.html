@@ -3,12 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Manifest AI Agent Hub — Inventory Dashboard</title>
+<title>Manifest AI Workspace 3.0 Agent Hub — Inventory Dashboard</title>
 <style>
   :root{
     --bg:#0b1020; --panel:#121a31; --panel2:#1a2440; --line:#243154;
     --ink:#e8edf7; --muted:#9aa7c4; --brand:#5b8cff; --brand2:#22c1a4;
-    --deepdelve:#5b8cff; --deepprobe:#22c1a4; --cross:#c084fc;
     --live:#22c55e; --progress:#eab308; --planned:#94a3b8;
     --card-radius:14px; --shadow:0 6px 24px rgba(0,0,0,.28);
     --page-grad:linear-gradient(180deg,#0a0f1e,#0b1020 40%);
@@ -20,7 +19,6 @@
   :root[data-theme="light"]{
     --bg:#eef2fb; --panel:#ffffff; --panel2:#f1f5ff; --line:#dce3f3;
     --ink:#1a2238; --muted:#5c6b8a; --brand:#3f6fe0; --brand2:#0f9d8f;
-    --deepdelve:#3f6fe0; --deepprobe:#0f9d8f; --cross:#9333ea;
     --shadow:0 6px 20px rgba(20,40,80,.10);
     --page-grad:linear-gradient(180deg,#e9eefb,#f4f6fb 40%);
     --kpi-grad:linear-gradient(135deg,#1a2238,#3f6fe0);
@@ -126,8 +124,6 @@
   .cat{background:var(--panel);border:1px solid var(--line);border-radius:var(--card-radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
   .cat h3{margin:0 0 2px;font-size:18px}
   .cat .meta{color:var(--muted);font-size:13px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .lp{font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--line)}
-  .lp.DeepDelve{color:var(--deepdelve)} .lp.DeepProbe{color:var(--deepprobe)} .lp.Cross-Platform{color:var(--cross)}
   .cat-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
   .cat-cols .box .t{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px}
   .clientchip{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:4px 9px;
@@ -240,8 +236,7 @@
         <button class="btn" id="tableViewBtn">▤ Table</button>
       </div>
     </div>
-    <div class="chip-group"><span class="lbl">Product</span><span id="plFilters"></span></div>
-    <div class="chip-group" style="margin-top:6px"><span class="lbl">Status</span><span id="stFilters"></span></div>
+    <div class="chip-group"><span class="lbl">Status</span><span id="stFilters"></span></div>
     <div class="chip-group" style="margin-top:6px"><span class="lbl">Category</span><span id="catFilters"></span></div>
     <div class="result-meta"><span id="count"></span><button class="more" id="clearFilters">Clear filters</button></div>
     <div class="grid" id="agentGrid"></div>
@@ -379,9 +374,10 @@ const Xlsx = (() => {
    In-browser normalization — mirrors build/convert.py so an
    uploaded workbook produces the same data shape.
    ============================================================ */
-const KNOWN_PL=new Set(["DeepDelve","DeepProbe","Cross-Platform"]);
-const PL_FALLBACK={"CAT-10":"Cross-Platform","CAT-11":"Cross-Platform"};
-const s=v=>v==null?"":String(v).trim();
+const s=v=>{ if(v==null) return ""; let t=String(v).trim();
+  if(t.indexOf("Deep")>=0){ t=t.replace(/\s*\bDeep(?:Delve|Probe)\b\s*/g," ").trim();
+    const m=t.match(/^\((.*)\)$/); if(m) t=m[1].trim(); }
+  return t; };
 function normMetric(raw){
   if(raw==null) return ["",null];
   if(typeof raw==="number"){ if(raw>0&&raw<=1){const p=Math.round(raw*100);return [p+"%",p];} return [String(raw),null]; }
@@ -395,8 +391,8 @@ function depStatus(blob){
   return "Planned";
 }
 function normalizeWorkbook(sheets){
-  // Master Data
-  const productLines={},industries={},deployments={};
+  // Master Data: first row per CategoryID = definition; later rows carry industries.
+  const mdNames={},industries={},deployments={};
   let section=null;
   for(const row of (sheets["Master Data"]||[])){
     const c0=s(row[0]),c1=s(row[1]),c2=s(row[2]),c3=s(row[3]);
@@ -404,7 +400,7 @@ function normalizeWorkbook(sheets){
     if(c0.startsWith("TABLE 4")){section="dep";continue;}
     if(c0==="CategoryID"||c0==="DeploymentID"||!c0) continue;
     if(section==="cat"&&c0.startsWith("CAT-")){
-      if(KNOWN_PL.has(c2)){ if(!(c0 in productLines))productLines[c0]=c2; }
+      if(!(c0 in mdNames)){ mdNames[c0]=c1; }
       else if(c2){ (industries[c0]=industries[c0]||[]); if(!industries[c0].includes(c2))industries[c0].push(c2); }
     } else if(section==="dep"&&c0.startsWith("DEP-")){
       (deployments[c1]=deployments[c1]||[]).push({client:c2,details:c3});
@@ -442,17 +438,17 @@ function normalizeWorkbook(sheets){
     else if(sec==="diff"){ if(c0&&c0!=="Differentiator"&&c1)diffs.push({title:c0,details:c1}); }
   }
   // Categories
-  const catIds=new Set([...Object.keys(catNames),...Object.keys(productLines),...Object.keys(industries),...Object.keys(deployments)]);
+  const catIds=new Set([...Object.keys(catNames),...Object.keys(mdNames),...Object.keys(industries),...Object.keys(deployments)]);
   const byCat={}; agents.forEach(a=>byCat[a.categoryId]=(byCat[a.categoryId]||0)+1);
   const categories=[...catIds].sort().map(cid=>{
     const deps=deployments[cid]||[];
     const status=deps.length?depStatus(deps.map(d=>d.client+" "+d.details).join(" ")):"Planned";
-    return {id:cid,name:catNames[cid]||cid,productLine:productLines[cid]||PL_FALLBACK[cid]||"Cross-Platform",
+    return {id:cid,name:catNames[cid]||mdNames[cid]||cid,
       industries:industries[cid]||[],deployments:deps,agentCount:byCat[cid]||0,status};
   });
   const look={}; categories.forEach(c=>look[c.id]=c);
-  agents.forEach(a=>{const c=look[a.categoryId]; a.status=c?c.status:"Planned"; a.productLine=c?c.productLine:"Cross-Platform";});
-  return {meta:{title:"Manifest AI Agent Portfolio",subtitle:"DeepDelve · DeepProbe — Enterprise Agentic AI",
+  agents.forEach(a=>{const c=look[a.categoryId]; a.status=c?c.status:"Planned";});
+  return {meta:{title:"Manifest AI Workspace 3.0 Agent Hub",subtitle:"Enterprise Agentic AI",
       contact:"www.manifestai.com",generatedAt:new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),
       sourceFile:"(in-browser preview)",kpis,keySectors:sectors,roi,differentiators:diffs},
     categories,agents,backlog};
@@ -462,11 +458,13 @@ function normalizeWorkbook(sheets){
 /* ============================================================
    Dashboard UI
    ============================================================ */
-const PL_COLORS={DeepDelve:"#5b8cff",DeepProbe:"#22c1a4","Cross-Platform":"#c084fc"};
 const STATUS_CLASS={Live:"live","In Progress":"progress",Planned:"planned"};
+const STATUS_COLOR={Live:"#22c55e","In Progress":"#eab308",Planned:"#94a3b8"};
+const CAT_PALETTE=["#5b8cff","#22c1a4","#c084fc","#f59e0b","#ef4444","#14b8a6","#8b5cf6","#3b82f6","#ec4899","#10b981","#f97316"];
+const catColor=id=>CAT_PALETTE[(parseInt(String(id).replace(/\D/g,""),10)||0)%CAT_PALETTE.length];
 let DATA, filters;
 
-function resetFilters(){ filters={q:"",pl:null,status:null,cat:null,view:"agents",layout:"grid"}; }
+function resetFilters(){ filters={q:"",status:null,cat:null,view:"agents",layout:"grid"}; }
 
 function init(data){
   DATA=data;
@@ -487,18 +485,15 @@ function renderKpis(){
 }
 
 function renderFilterChips(){
-  const pls=[...new Set(DATA.categories.map(c=>c.productLine))];
-  document.getElementById("plFilters").innerHTML=pls.map(p=>`<span class="chip" data-pl="${esc(p)}">${esc(p)}</span>`).join("");
   const sts=["Live","In Progress","Planned"];
   document.getElementById("stFilters").innerHTML=sts.map(p=>`<span class="chip" data-st="${esc(p)}">${esc(p)}</span>`).join("");
   document.getElementById("catFilters").innerHTML=DATA.categories.map(c=>
-    `<span class="chip" data-cat="${esc(c.id)}" title="${esc(c.productLine)}">${esc(c.name)} <span class="tag">(${c.agentCount})</span></span>`).join("");
+    `<span class="chip" data-cat="${esc(c.id)}">${esc(c.name)} <span class="tag">(${c.agentCount})</span></span>`).join("");
 }
 
 function filteredAgents(){
   const q=filters.q.toLowerCase();
   return DATA.agents.filter(a=>{
-    if(filters.pl && a.productLine!==filters.pl) return false;
     if(filters.status && a.status!==filters.status) return false;
     if(filters.cat && a.categoryId!==filters.cat) return false;
     if(q){ const blob=(a.name+" "+a.businessFunction+" "+a.problem+" "+a.description+" "+a.categoryName).toLowerCase();
@@ -509,7 +504,6 @@ function filteredAgents(){
 
 function apply(){
   // chip active states
-  document.querySelectorAll("#plFilters .chip").forEach(c=>c.classList.toggle("active",c.dataset.pl===filters.pl));
   document.querySelectorAll("#stFilters .chip").forEach(c=>c.classList.toggle("active",c.dataset.st===filters.status));
   document.querySelectorAll("#catFilters .chip").forEach(c=>c.classList.toggle("active",c.dataset.cat===filters.cat));
   // tabs / sections
@@ -535,7 +529,7 @@ function renderAgents(){
 
 function renderAgentCards(list){
   document.getElementById("agentGrid").innerHTML=list.map(a=>{
-    const sc=STATUS_CLASS[a.status]||"planned", accent=PL_COLORS[a.productLine]||"#5b8cff";
+    const sc=STATUS_CLASS[a.status]||"planned", accent=catColor(a.categoryId);
     const barWidth = a.metricPct!=null ? a.metricPct : 60;
     return `<div class="card" style="--accent:${accent}">
       <div class="c-head">
@@ -581,8 +575,7 @@ function renderCategories(){
     const ag=agents.map(a=>`<span class="agentchip">• ${esc(a.name)}</span>`).join("");
     return `<div class="cat">
       <h3>${esc(c.name)}</h3>
-      <div class="meta"><span class="lp ${c.productLine}">${esc(c.productLine)}</span>
-        <span class="pill ${STATUS_CLASS[c.status]||'planned'}">${esc(c.status)}</span>
+      <div class="meta"><span class="pill ${STATUS_CLASS[c.status]||'planned'}">${esc(c.status)}</span>
         <span class="tag">${c.agentCount} agents · ${c.deployments.length} deployments</span></div>
       <div class="cat-cols">
         <div class="box"><div class="t">Agents</div>${ag||'<span class="tag">—</span>'}</div>
@@ -593,16 +586,12 @@ function renderCategories(){
 }
 
 function renderInsights(){
-  const byCat=DATA.categories.map(c=>({label:c.name,value:c.agentCount,color:PL_COLORS[c.productLine]})).filter(x=>x.value).sort((a,b)=>b.value-a.value);
-  const plMap={}; DATA.agents.forEach(a=>plMap[a.productLine]=(plMap[a.productLine]||0)+1);
-  const byPl=Object.entries(plMap).map(([k,v])=>({label:k,value:v,color:PL_COLORS[k]})).sort((a,b)=>b.value-a.value);
+  const byCat=DATA.categories.map(c=>({label:c.name,value:c.agentCount,color:catColor(c.id)})).filter(x=>x.value).sort((a,b)=>b.value-a.value);
   const stMap={}; DATA.agents.forEach(a=>stMap[a.status]=(stMap[a.status]||0)+1);
-  const stColor={Live:"#22c55e","In Progress":"#eab308",Planned:"#94a3b8"};
-  const byStatus=Object.entries(stMap).map(([k,v])=>({label:k,value:v,color:stColor[k]})).sort((a,b)=>b.value-a.value);
-  const depMap={}; DATA.categories.forEach(c=>depMap[c.name]=c.deployments.length);
-  const byDep=Object.entries(depMap).map(([k,v])=>({label:k,value:v,color:"#5b8cff"})).filter(x=>x.value).sort((a,b)=>b.value-a.value);
+  const byStatus=Object.entries(stMap).map(([k,v])=>({label:k,value:v,color:STATUS_COLOR[k]})).sort((a,b)=>b.value-a.value);
+  const byDep=DATA.categories.map(c=>({label:c.name,value:c.deployments.length,color:catColor(c.id)})).filter(x=>x.value).sort((a,b)=>b.value-a.value);
   document.getElementById("charts").innerHTML=
-    chart("Agents by category",byCat)+chart("Agents by product line",byPl)+
+    chart("Agents by category",byCat)+
     chart("Agents by deployment status",byStatus)+chart("Live client deployments by category",byDep);
 }
 function chart(title,rows){
@@ -647,10 +636,9 @@ function bind(){
     filters.view=t.dataset.view; apply();
   });
   document.getElementById("q").addEventListener("input",e=>{filters.q=e.target.value;renderAgents();writeHash();});
-  document.getElementById("plFilters").addEventListener("click",chipHandler("pl"));
   document.getElementById("stFilters").addEventListener("click",chipHandler("status","st"));
   document.getElementById("catFilters").addEventListener("click",chipHandler("cat"));
-  document.getElementById("clearFilters").addEventListener("click",()=>{filters.q="";document.getElementById("q").value="";filters.pl=filters.status=filters.cat=null;apply();});
+  document.getElementById("clearFilters").addEventListener("click",()=>{filters.q="";document.getElementById("q").value="";filters.status=filters.cat=null;apply();});
   document.getElementById("gridViewBtn").addEventListener("click",()=>{filters.layout="grid";renderAgents();writeHash();});
   document.getElementById("tableViewBtn").addEventListener("click",()=>{filters.layout="table";renderAgents();writeHash();});
   document.getElementById("internalToggle").addEventListener("change",e=>setInternal(e.target.checked));
@@ -690,7 +678,6 @@ function writeHash(){
   const p=new URLSearchParams();
   if(filters.view!=="agents")p.set("view",filters.view);
   if(filters.q)p.set("q",filters.q);
-  if(filters.pl)p.set("pl",filters.pl);
   if(filters.status)p.set("status",filters.status);
   if(filters.cat)p.set("cat",filters.cat);
   if(filters.layout!=="grid")p.set("layout",filters.layout);
@@ -703,14 +690,14 @@ function readHash(){
   if(p.get("internal")==="1"){document.getElementById("internalToggle").checked=true;setInternal(true);}
   filters.view=p.get("view")||"agents";
   filters.q=p.get("q")||""; document.getElementById("q").value=filters.q;
-  filters.pl=p.get("pl")||null; filters.status=p.get("status")||null; filters.cat=p.get("cat")||null;
+  filters.status=p.get("status")||null; filters.cat=p.get("cat")||null;
   filters.layout=p.get("layout")||"grid";
 }
 
 /* ---------- CSV export of current filtered set ---------- */
 function exportCsv(){
   const internal=document.body.classList.contains("show-internal");
-  const cols=["id","name","categoryName","productLine","businessFunction","problem","before","after","metric","metricValue","status"];
+  const cols=["id","name","categoryName","businessFunction","problem","before","after","metric","metricValue","status"];
   if(internal) cols.push("internalComment");
   const head=cols.join(",");
   const rows=filteredAgents().map(a=>cols.map(c=>csvCell(a[c])).join(","));
