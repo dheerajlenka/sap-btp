@@ -453,7 +453,7 @@ function normalizeWorkbook(sheets){
   const look={}; categories.forEach(c=>look[c.id]=c);
   agents.forEach(a=>{const c=look[a.categoryId]; a.status=c?c.status:"Planned"; a.productLine=c?c.productLine:"Cross-Platform";});
   return {meta:{title:"Manifest AI Agent Portfolio",subtitle:"DeepDelve · DeepProbe — Enterprise Agentic AI",
-      contact:"AlphaData Sales Team · www.manifestai.com",generatedAt:new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),
+      contact:"www.manifestai.com",generatedAt:new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),
       sourceFile:"(in-browser preview)",kpis,keySectors:sectors,roi,differentiators:diffs},
     categories,agents,backlog};
 }

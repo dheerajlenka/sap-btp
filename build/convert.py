@@ -226,7 +226,7 @@ def build(xlsx_path):
         "meta": {
             "title": "Manifest AI Agent Portfolio",
             "subtitle": "DeepDelve · DeepProbe — Enterprise Agentic AI",
-            "contact": "AlphaData Sales Team · www.manifestai.com",
+            "contact": "www.manifestai.com",
             "generatedAt": dt.datetime.now().strftime("%d %b %Y"),
             "sourceFile": os.path.basename(xlsx_path),
             "kpis": kpis,
