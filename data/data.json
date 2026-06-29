@@ -1,10 +1,10 @@
 {
   "meta": {
-    "title": "ZeonAI Agent Portfolio",
+    "title": "Manifest AI Agent Portfolio",
     "subtitle": "DeepDelve · DeepProbe — Enterprise Agentic AI",
-    "contact": "AlphaData Sales Team · www.zeonai.com",
+    "contact": "AlphaData Sales Team · www.manifestai.com",
     "generatedAt": "29 Jun 2026",
-    "sourceFile": "Zeon_AI_Agents_Inventory.xlsx",
+    "sourceFile": "Manifest_AI_Agents_Inventory.xlsx",
     "kpis": [
       {
         "label": "Total Agents",

@@ -1,6 +1,6 @@
-# ZeonAI Agent Hub — Interactive Inventory Dashboard
+# Manifest AI Agent Hub — Interactive Inventory Dashboard
 
-An interactive, shareable dashboard of the ZeonAI / AlphaData agent portfolio,
+An interactive, shareable dashboard of the Manifest AI / AlphaData agent portfolio,
 driven by the Excel inventory workbook as the single source of truth.
 
 The deliverable is **one self-contained file — `dist/index.html`** — with all data

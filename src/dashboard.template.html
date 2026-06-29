@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ZeonAI Agent Hub — Inventory Dashboard</title>
+<title>Manifest AI Agent Hub — Inventory Dashboard</title>
 <style>
   :root{
     --bg:#0b1020; --panel:#121a31; --panel2:#1a2440; --line:#243154;
@@ -168,9 +168,9 @@
   <div class="wrap">
     <div class="hero-top">
       <div class="brand">
-        <div class="logo">Z</div>
+        <div class="logo">M</div>
         <div>
-          <h1 id="m-title">ZeonAI Agent Portfolio</h1>
+          <h1 id="m-title">Manifest AI Agent Portfolio</h1>
           <div class="sub" id="m-subtitle"></div>
         </div>
       </div>
@@ -425,8 +425,8 @@ function normalizeWorkbook(sheets){
   });
   const look={}; categories.forEach(c=>look[c.id]=c);
   agents.forEach(a=>{const c=look[a.categoryId]; a.status=c?c.status:"Planned"; a.productLine=c?c.productLine:"Cross-Platform";});
-  return {meta:{title:"ZeonAI Agent Portfolio",subtitle:"DeepDelve · DeepProbe — Enterprise Agentic AI",
-      contact:"AlphaData Sales Team · www.zeonai.com",generatedAt:new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),
+  return {meta:{title:"Manifest AI Agent Portfolio",subtitle:"DeepDelve · DeepProbe — Enterprise Agentic AI",
+      contact:"AlphaData Sales Team · www.manifestai.com",generatedAt:new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),
       sourceFile:"(in-browser preview)",kpis,keySectors:sectors,roi,differentiators:diffs},
     categories,agents,backlog};
 }
@@ -671,7 +671,7 @@ function exportCsv(){
   if(internal) cols.push("internalComment");
   const head=cols.join(",");
   const rows=filteredAgents().map(a=>cols.map(c=>csvCell(a[c])).join(","));
-  download("zeonai-agents.csv",[head,...rows].join("\n"));
+  download("manifest-ai-agents.csv",[head,...rows].join("\n"));
 }
 function csvCell(v){ v=v==null?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function download(name,text){

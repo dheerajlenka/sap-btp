@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convert the ZeonAI Agent Inventory workbook into normalized data.json.
+"""Convert the Manifest AI Agent Inventory workbook into normalized data.json.
 
 Usage:
     python build/convert.py [path/to/workbook.xlsx] [-o data/data.json]
@@ -20,7 +20,7 @@ try:
 except ImportError:
     sys.exit("openpyxl is required: pip install openpyxl")
 
-DEFAULT_XLSX = "inventory/Zeon_AI_Agents_Inventory.xlsx"
+DEFAULT_XLSX = "inventory/Manifest_AI_Agents_Inventory.xlsx"
 DEFAULT_OUT = "data/data.json"
 
 KNOWN_PRODUCT_LINES = {"DeepDelve", "DeepProbe", "Cross-Platform"}
@@ -224,9 +224,9 @@ def build(xlsx_path):
 
     return {
         "meta": {
-            "title": "ZeonAI Agent Portfolio",
+            "title": "Manifest AI Agent Portfolio",
             "subtitle": "DeepDelve · DeepProbe — Enterprise Agentic AI",
-            "contact": "AlphaData Sales Team · www.zeonai.com",
+            "contact": "AlphaData Sales Team · www.manifestai.com",
             "generatedAt": dt.datetime.now().strftime("%d %b %Y"),
             "sourceFile": os.path.basename(xlsx_path),
             "kpis": kpis,
