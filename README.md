@@ -14,11 +14,15 @@ and charts baked in and **zero external dependencies**. You can:
 ## What's in the dashboard
 
 - **KPI band** — total agents, live clients, production users, documents/month, categories.
-- **Agents** — searchable, filterable card grid (or table) with each agent's
-  business function, problem, **Before → After** states, headline metric, and an
-  expandable description.
-- **Filters** — deployment status (Live / In Progress / Planned) and category. Filter
-  state is encoded in the URL hash, so a filtered view is itself a shareable link.
+- **Agents** — cards grouped into category sections (each with an agent count),
+  showing an avatar, business function, status, and industry tags. Clicking a card
+  opens a **slide-over detail panel** with About, Industries, the problem it solves,
+  a Before → After breakdown, the headline metric, and a "Book a Demo" call-to-action.
+  A table view is also available.
+- **Filters** — dropdowns for **Category**, **Industry**, and **Status** (Live / In
+  Progress / Planned), plus free-text search. Each agent inherits its category's
+  industries (defined in the workbook). Filter and open-agent state is encoded in the
+  URL hash, so a filtered view — or a specific agent's panel — is itself a shareable link.
 - **Categories** — per-category panels with industries, agents, and live-deployment clients.
 - **Insights** — charts: agents by category, by status, and live deployments by category.
 - **Roadmap** — the backlog grouped by category with go-live sprints (**internal view only**).

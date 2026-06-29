@@ -40,10 +40,16 @@ def main():
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     html = template.replace("{{DATA}}", payload)
 
-    # Guard: the artifact must be self-contained (no external CDN references).
-    external = re.findall(r"""(?:src|href)\s*=\s*['"]https?://[^'"]+""", html)
+    # Guard: the artifact must be self-contained — no external *resource* loads
+    # (scripts, stylesheets, images, iframes, or CSS url()). Plain anchor
+    # navigation (<a href="https://…">) is fine and intentionally allowed.
+    external = re.findall(
+        r"""<(?:script|img|iframe)\b[^>]*\bsrc\s*=\s*['"]https?://[^'"]+"""
+        r"""|<link\b[^>]*\bhref\s*=\s*['"]https?://[^'"]+"""
+        r"""|url\(\s*['"]?https?://[^)]+""",
+        html, re.IGNORECASE)
     if external:
-        sys.exit("Refusing to build: external references found:\n  " + "\n  ".join(external))
+        sys.exit("Refusing to build: external resource references found:\n  " + "\n  ".join(external))
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:

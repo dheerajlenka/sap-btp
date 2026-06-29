@@ -112,6 +112,53 @@
   body.show-internal .internal{display:block}
   .internal b{color:#ffe0a3}
 
+  /* Filter dropdowns */
+  .controls .flbl{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;align-self:center}
+  .dd{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13px;cursor:pointer}
+  .dd:hover{border-color:var(--brand)}
+
+  /* Category-grouped sections */
+  .group{margin:0 0 8px}
+  .group-head{display:flex;align-items:center;gap:10px;margin:22px 0 12px}
+  .group-head h2{font-size:17px;margin:0}
+  .group-count{font-size:12px;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:2px 10px}
+
+  /* Card additions (cards are now clickable, open the detail panel) */
+  .card{cursor:pointer;transition:transform .15s,border-color .15s}
+  .card:hover{border-color:var(--brand);transform:translateY(-2px)}
+  .ava{width:38px;height:38px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;font-weight:700;font-size:12.5px;
+       color:#fff;background:var(--accent,var(--brand))}
+  .c-title{flex:1;min-width:0}
+  .summary{color:var(--muted);font-size:13px}
+  .chips-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:auto;padding-top:4px}
+  .ind-chip{font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--brand);background:transparent}
+  .ind-more{font-size:11px;color:var(--muted)}
+
+  /* Slide-over detail panel */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .detail{position:fixed;top:0;right:0;height:100vh;width:min(500px,94vw);background:var(--bg);border-left:1px solid var(--line);
+          box-shadow:-12px 0 44px rgba(0,0,0,.4);transform:translateX(100%);transition:transform .25s ease;z-index:50;overflow-y:auto;padding:26px 26px 90px}
+  .detail.show{transform:translateX(0)}
+  .detail-close{position:absolute;top:16px;right:16px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+                width:34px;height:34px;border-radius:8px;font-size:18px;line-height:1;cursor:pointer}
+  .detail-close:hover{border-color:var(--brand)}
+  .detail h2{margin:0 36px 12px 0;font-size:22px}
+  .d-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .sec-t{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:20px 0 8px}
+  .about{font-size:14px;color:var(--ink)}
+  .d-ind{display:flex;gap:7px;flex-wrap:wrap}
+  .problem-box{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--progress);border-radius:8px;padding:12px;font-size:13.5px}
+  .ba2{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .ba2 .h{font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;font-weight:700}
+  .ba2 .bh{color:#ef6b6b;background:rgba(239,68,68,.10)}
+  .ba2 .ah{color:var(--live);background:rgba(34,197,94,.10)}
+  .ba2 .cell{padding:9px 12px;font-size:13px;border-top:1px solid var(--line)}
+  .ba2 .cell.b{border-right:1px solid var(--line)}
+  .cta{position:fixed;bottom:0;right:0;width:min(500px,94vw);box-sizing:border-box;display:block;text-align:center;
+       background:var(--ink);color:var(--bg);padding:15px;font-weight:700;text-decoration:none;border:0;cursor:pointer;font-size:14px}
+  .cta:hover{opacity:.92}
+
   /* Table view */
   table{width:100%;border-collapse:collapse;font-size:13px}
   th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -230,16 +277,18 @@
   <!-- AGENTS -->
   <section id="view-agents">
     <div class="controls">
-      <div class="search">🔎<input id="q" type="search" placeholder="Search agents, functions, problems…"></div>
+      <span class="flbl">Filter by</span>
+      <select class="dd" id="fCategory"></select>
+      <select class="dd" id="fIndustry"></select>
+      <select class="dd" id="fStatus"></select>
+      <div class="search">🔎<input id="q" type="search" placeholder="Search agents…"></div>
       <div class="viewtoggle">
         <button class="btn primary" id="gridViewBtn">▦ Cards</button>
         <button class="btn" id="tableViewBtn">▤ Table</button>
       </div>
     </div>
-    <div class="chip-group"><span class="lbl">Status</span><span id="stFilters"></span></div>
-    <div class="chip-group" style="margin-top:6px"><span class="lbl">Category</span><span id="catFilters"></span></div>
     <div class="result-meta"><span id="count"></span><button class="more" id="clearFilters">Clear filters</button></div>
-    <div class="grid" id="agentGrid"></div>
+    <div id="agentGroups"></div>
     <div id="agentTable" class="hide"></div>
   </section>
 
@@ -262,6 +311,12 @@
     </div>
   </section>
 </main>
+
+<div class="overlay" id="overlay"></div>
+<aside class="detail" id="detail" aria-hidden="true">
+  <button class="detail-close" id="detailClose" aria-label="Close">×</button>
+  <div id="detailBody"></div>
+</aside>
 
 <footer class="wrap">
   <span id="m-contact"></span>
@@ -462,19 +517,28 @@ const STATUS_CLASS={Live:"live","In Progress":"progress",Planned:"planned"};
 const STATUS_COLOR={Live:"#22c55e","In Progress":"#eab308",Planned:"#94a3b8"};
 const CAT_PALETTE=["#5b8cff","#22c1a4","#c084fc","#f59e0b","#ef4444","#14b8a6","#8b5cf6","#3b82f6","#ec4899","#10b981","#f97316"];
 const catColor=id=>CAT_PALETTE[(parseInt(String(id).replace(/\D/g,""),10)||0)%CAT_PALETTE.length];
-let DATA, filters;
+let DATA, filters, catById={};
 
-function resetFilters(){ filters={q:"",status:null,cat:null,view:"agents",layout:"grid"}; }
+function resetFilters(){ filters={q:"",status:null,cat:null,industry:null,view:"agents",layout:"grid"}; }
+
+// Each agent inherits the industries defined for its category in the workbook.
+function agentIndustries(a){ const c=catById[a.categoryId]; return c?c.industries:[]; }
+function allIndustries(){ const s=new Set(); DATA.categories.forEach(c=>c.industries.forEach(i=>s.add(i))); return [...s].sort(); }
+function initials(name){
+  const w=String(name).trim().split(/\s+/);
+  return (w.length>1 ? (w[0][0]+w[1][0]) : name.slice(0,2)).toUpperCase();
+}
 
 function init(data){
   DATA=data;
   resetFilters();
+  catById={}; DATA.categories.forEach(c=>catById[c.id]=c);
   // meta
   document.getElementById("m-title").textContent=data.meta.title;
   document.getElementById("m-subtitle").textContent=data.meta.subtitle;
   document.getElementById("m-contact").textContent=data.meta.contact;
   document.getElementById("m-generated").textContent="Data as of "+data.meta.generatedAt+" · source: "+data.meta.sourceFile;
-  renderKpis(); renderFilterChips(); renderCategories(); renderInsights(); renderRoadmap(); renderRoi();
+  renderKpis(); renderFilters(); renderCategories(); renderInsights(); renderRoadmap(); renderRoi();
   readHash();
   apply();
 }
@@ -484,11 +548,14 @@ function renderKpis(){
     `<div class="kpi"><div class="v">${esc(k.value)}</div><div class="l">${esc(k.label)}</div></div>`).join("");
 }
 
-function renderFilterChips(){
-  const sts=["Live","In Progress","Planned"];
-  document.getElementById("stFilters").innerHTML=sts.map(p=>`<span class="chip" data-st="${esc(p)}">${esc(p)}</span>`).join("");
-  document.getElementById("catFilters").innerHTML=DATA.categories.map(c=>
-    `<span class="chip" data-cat="${esc(c.id)}">${esc(c.name)} <span class="tag">(${c.agentCount})</span></span>`).join("");
+function renderFilters(){
+  const opt=(v,label,sel)=>`<option value="${esc(v)}"${sel?" selected":""}>${esc(label)}</option>`;
+  document.getElementById("fCategory").innerHTML=
+    opt("","All categories")+DATA.categories.map(c=>opt(c.id,`${c.name} (${c.agentCount})`)).join("");
+  document.getElementById("fIndustry").innerHTML=
+    opt("","All industries")+allIndustries().map(i=>opt(i,i)).join("");
+  document.getElementById("fStatus").innerHTML=
+    opt("","All statuses")+["Live","In Progress","Planned"].map(s=>opt(s,s)).join("");
 }
 
 function filteredAgents(){
@@ -496,6 +563,7 @@ function filteredAgents(){
   return DATA.agents.filter(a=>{
     if(filters.status && a.status!==filters.status) return false;
     if(filters.cat && a.categoryId!==filters.cat) return false;
+    if(filters.industry && !agentIndustries(a).includes(filters.industry)) return false;
     if(q){ const blob=(a.name+" "+a.businessFunction+" "+a.problem+" "+a.description+" "+a.categoryName).toLowerCase();
            if(!blob.includes(q)) return false; }
     return true;
@@ -503,9 +571,10 @@ function filteredAgents(){
 }
 
 function apply(){
-  // chip active states
-  document.querySelectorAll("#stFilters .chip").forEach(c=>c.classList.toggle("active",c.dataset.st===filters.status));
-  document.querySelectorAll("#catFilters .chip").forEach(c=>c.classList.toggle("active",c.dataset.cat===filters.cat));
+  // sync dropdowns to filter state
+  document.getElementById("fCategory").value=filters.cat||"";
+  document.getElementById("fIndustry").value=filters.industry||"";
+  document.getElementById("fStatus").value=filters.status||"";
   // tabs / sections
   ["agents","categories","insights","roadmap","roi"].forEach(v=>{
     document.getElementById("view-"+v).classList.toggle("hide",v!==filters.view);
@@ -517,42 +586,81 @@ function apply(){
 
 function renderAgents(){
   const list=filteredAgents();
-  document.getElementById("count").textContent=`${list.length} of ${DATA.agents.length} agents`;
-  const grid=document.getElementById("agentGrid"), tbl=document.getElementById("agentTable");
+  document.getElementById("count").textContent=`Showing ${list.length} of ${DATA.agents.length} agents`;
+  const groups=document.getElementById("agentGroups"), tbl=document.getElementById("agentTable");
   const showTable=filters.layout==="table";
-  grid.classList.toggle("hide",showTable); tbl.classList.toggle("hide",!showTable);
+  groups.classList.toggle("hide",showTable); tbl.classList.toggle("hide",!showTable);
   document.getElementById("gridViewBtn").classList.toggle("primary",!showTable);
   document.getElementById("tableViewBtn").classList.toggle("primary",showTable);
-  if(!list.length){ grid.innerHTML=tbl.innerHTML='<div class="empty">No agents match your filters.</div>'; return; }
-  if(showTable) renderAgentTable(list); else renderAgentCards(list);
-}
-
-function renderAgentCards(list){
-  document.getElementById("agentGrid").innerHTML=list.map(a=>{
-    const sc=STATUS_CLASS[a.status]||"planned", accent=catColor(a.categoryId);
-    const barWidth = a.metricPct!=null ? a.metricPct : 60;
-    return `<div class="card" style="--accent:${accent}">
-      <div class="c-head">
-        <div><h3>${esc(a.name)}</h3><div class="fn">${esc(a.businessFunction)} · ${esc(a.categoryName)}</div></div>
-        <span class="pill ${sc}">${esc(a.status)}</span>
-      </div>
-      <div class="ba">
-        <div class="b"><div class="t">Before</div>${esc(a.before)||"—"}</div>
-        <div class="arrow">→</div>
-        <div class="b"><div class="t">After</div>${esc(a.after)||"—"}</div>
-      </div>
-      <div class="metric"><div class="mv">${esc(a.metricValue)||"—"}</div>
-        <div><div class="ml">${esc(a.metric)||"Key metric"}</div>
-        ${a.metricPct!=null?`<div class="bar"><span style="width:${barWidth}%"></span></div>`:""}</div></div>
-      <div class="desc">${esc(a.description)}</div>
-      ${a.description?`<button class="more" data-more>Show details ▾</button>`:""}
-      ${a.internalComment?`<div class="internal"><b>Internal:</b> ${esc(a.internalComment)}</div>`:""}
+  if(!list.length){ groups.innerHTML=tbl.innerHTML='<div class="empty">No agents match your filters.</div>'; return; }
+  if(showTable){ renderAgentTable(list); return; }
+  // group cards by category, in the canonical category order
+  groups.innerHTML=DATA.categories.map(c=>{
+    const items=list.filter(a=>a.categoryId===c.id);
+    if(!items.length) return "";
+    return `<div class="group">
+      <div class="group-head"><h2>${esc(c.name)}</h2><span class="group-count">${items.length} agent${items.length>1?"s":""}</span></div>
+      <div class="grid">${items.map(agentCard).join("")}</div>
     </div>`;
   }).join("");
-  document.querySelectorAll("#agentGrid [data-more]").forEach(b=>b.addEventListener("click",e=>{
-    const card=e.target.closest(".card"); const open=card.classList.toggle("open");
-    e.target.textContent=open?"Hide details ▴":"Show details ▾";
-  }));
+  groups.querySelectorAll(".card").forEach(card=>card.addEventListener("click",()=>openDetail(card.dataset.id)));
+}
+
+function agentCard(a){
+  const sc=STATUS_CLASS[a.status]||"planned", accent=catColor(a.categoryId);
+  const inds=agentIndustries(a);
+  const chips=inds.slice(0,3).map(i=>`<span class="ind-chip">${esc(i)}</span>`).join("")
+    +(inds.length>3?`<span class="ind-more">+${inds.length-3}</span>`:"");
+  return `<div class="card" data-id="${esc(a.id)}" style="--accent:${accent}">
+    <div class="c-head">
+      <div class="ava">${esc(initials(a.name))}</div>
+      <div class="c-title"><h3>${esc(a.name)}</h3><div class="fn">${esc(a.categoryName)}</div></div>
+      <span class="pill ${sc}">${esc(a.status)}</span>
+    </div>
+    <div class="summary">${esc(a.businessFunction)}</div>
+    <div class="chips-row">${chips||'<span class="ind-more">—</span>'}</div>
+  </div>`;
+}
+
+/* ---------- slide-over detail panel ---------- */
+function openDetail(id){
+  const a=DATA.agents.find(x=>x.id===id); if(!a) return;
+  const inds=agentIndustries(a);
+  const bLines=String(a.before).split(/;|\n/).map(x=>x.trim()).filter(Boolean);
+  const aLines=String(a.after).split(/;|\n/).map(x=>x.trim()).filter(Boolean);
+  const n=Math.max(bLines.length,aLines.length,1);
+  let baRows="";
+  for(let i=0;i<n;i++) baRows+=`<div class="cell b">${esc(bLines[i]||"")}</div><div class="cell">${esc(aLines[i]||"")}</div>`;
+  const metric = a.metricValue ? `<div class="sec-t">Key Metric</div>
+      <div class="metric"><div class="mv">${esc(a.metricValue)}</div>
+        <div><div class="ml">${esc(a.metric)||"Key metric"}</div>
+        ${a.metricPct!=null?`<div class="bar"><span style="width:${a.metricPct}%"></span></div>`:""}</div></div>` : "";
+  const site = /^https?:/.test(DATA.meta.contact) ? DATA.meta.contact : "https://"+DATA.meta.contact.replace(/^\/+/,"");
+  document.getElementById("detailBody").innerHTML=`
+    <h2>${esc(a.name)}</h2>
+    <div class="d-chips">
+      <span class="pill ${STATUS_CLASS[a.status]||'planned'}">${esc(a.status)}</span>
+      <span class="pill" style="color:${catColor(a.categoryId)};border-color:${catColor(a.categoryId)}66">${esc(a.categoryName)}</span>
+    </div>
+    <div class="sec-t">About this agent</div>
+    <div class="about">${esc(a.description)||esc(a.businessFunction)}</div>
+    ${inds.length?`<div class="sec-t">Industries</div><div class="d-ind">${inds.map(i=>`<span class="ind-chip">${esc(i)}</span>`).join("")}</div>`:""}
+    ${a.problem?`<div class="sec-t">The problem it solves</div><div class="problem-box">${esc(a.problem)}</div>`:""}
+    ${(bLines.length||aLines.length)?`<div class="sec-t">Before &amp; After</div>
+      <div class="ba2"><div class="h bh">Before</div><div class="h ah">After</div>${baRows}</div>`:""}
+    ${metric}
+    ${a.internalComment?`<div class="internal" style="display:block;margin-top:18px"><b>Internal:</b> ${esc(a.internalComment)}</div>`:""}
+    <a class="cta" href="${esc(site)}" target="_blank" rel="noopener">Book a Demo →</a>`;
+  document.getElementById("detail").classList.add("show");
+  document.getElementById("detail").setAttribute("aria-hidden","false");
+  document.getElementById("overlay").classList.add("show");
+  filters.agent=id; writeHash();
+}
+function closeDetail(){
+  document.getElementById("detail").classList.remove("show");
+  document.getElementById("detail").setAttribute("aria-hidden","true");
+  document.getElementById("overlay").classList.remove("show");
+  filters.agent=null; writeHash();
 }
 
 function renderAgentTable(list){
@@ -636,11 +744,15 @@ function bind(){
     filters.view=t.dataset.view; apply();
   });
   document.getElementById("q").addEventListener("input",e=>{filters.q=e.target.value;renderAgents();writeHash();});
-  document.getElementById("stFilters").addEventListener("click",chipHandler("status","st"));
-  document.getElementById("catFilters").addEventListener("click",chipHandler("cat"));
-  document.getElementById("clearFilters").addEventListener("click",()=>{filters.q="";document.getElementById("q").value="";filters.status=filters.cat=null;apply();});
+  document.getElementById("fCategory").addEventListener("change",e=>{filters.cat=e.target.value||null;renderAgents();writeHash();});
+  document.getElementById("fIndustry").addEventListener("change",e=>{filters.industry=e.target.value||null;renderAgents();writeHash();});
+  document.getElementById("fStatus").addEventListener("change",e=>{filters.status=e.target.value||null;renderAgents();writeHash();});
+  document.getElementById("clearFilters").addEventListener("click",()=>{filters.q="";document.getElementById("q").value="";filters.status=filters.cat=filters.industry=null;apply();});
   document.getElementById("gridViewBtn").addEventListener("click",()=>{filters.layout="grid";renderAgents();writeHash();});
   document.getElementById("tableViewBtn").addEventListener("click",()=>{filters.layout="table";renderAgents();writeHash();});
+  document.getElementById("detailClose").addEventListener("click",closeDetail);
+  document.getElementById("overlay").addEventListener("click",closeDetail);
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeDetail(); });
   document.getElementById("internalToggle").addEventListener("change",e=>setInternal(e.target.checked));
   document.getElementById("printBtn").addEventListener("click",()=>window.print());
   document.getElementById("csvBtn").addEventListener("click",exportCsv);
@@ -663,10 +775,6 @@ function syncThemeButton(){
   const btn=document.getElementById("themeBtn");
   if(btn) btn.textContent = light ? "☀ Light" : "🌙 Dark";
 }
-function chipHandler(key,attr){ attr=attr||key;
-  return e=>{ const c=e.target.closest(".chip"); if(!c)return; const val=c.dataset[attr];
-    filters[key]=filters[key]===val?null:val; apply(); };
-}
 function setInternal(on){
   document.body.classList.toggle("show-internal",on);
   document.querySelectorAll(".internal-tab").forEach(t=>t.classList.toggle("hide",!on));
@@ -680,7 +788,9 @@ function writeHash(){
   if(filters.q)p.set("q",filters.q);
   if(filters.status)p.set("status",filters.status);
   if(filters.cat)p.set("cat",filters.cat);
+  if(filters.industry)p.set("industry",filters.industry);
   if(filters.layout!=="grid")p.set("layout",filters.layout);
+  if(filters.agent)p.set("agent",filters.agent);
   if(document.body.classList.contains("show-internal"))p.set("internal","1");
   const str=p.toString();
   history.replaceState(null,"",str?("#"+str):location.pathname+location.search);
@@ -690,17 +800,18 @@ function readHash(){
   if(p.get("internal")==="1"){document.getElementById("internalToggle").checked=true;setInternal(true);}
   filters.view=p.get("view")||"agents";
   filters.q=p.get("q")||""; document.getElementById("q").value=filters.q;
-  filters.status=p.get("status")||null; filters.cat=p.get("cat")||null;
+  filters.status=p.get("status")||null; filters.cat=p.get("cat")||null; filters.industry=p.get("industry")||null;
   filters.layout=p.get("layout")||"grid";
+  const ag=p.get("agent"); if(ag) setTimeout(()=>openDetail(ag),0);
 }
 
 /* ---------- CSV export of current filtered set ---------- */
 function exportCsv(){
   const internal=document.body.classList.contains("show-internal");
-  const cols=["id","name","categoryName","businessFunction","problem","before","after","metric","metricValue","status"];
+  const cols=["id","name","categoryName","industries","businessFunction","problem","before","after","metric","metricValue","status"];
   if(internal) cols.push("internalComment");
   const head=cols.join(",");
-  const rows=filteredAgents().map(a=>cols.map(c=>csvCell(a[c])).join(","));
+  const rows=filteredAgents().map(a=>cols.map(c=>csvCell(c==="industries"?agentIndustries(a).join("; "):a[c])).join(","));
   download("manifest-ai-agents.csv",[head,...rows].join("\n"));
 }
 function csvCell(v){ v=v==null?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
