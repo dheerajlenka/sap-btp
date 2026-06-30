@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manifest AI Workspace 3.0 Agent Hub — Inventory Dashboard</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#121a31; --panel2:#1a2440; --line:#243154;
+    --ink:#e8edf7; --muted:#9aa7c4; --brand:#5b8cff; --brand2:#22c1a4;
+    --live:#22c55e; --progress:#eab308; --planned:#94a3b8;
+    --card-radius:14px; --shadow:0 6px 24px rgba(0,0,0,.28);
+    --page-grad:linear-gradient(180deg,#0a0f1e,#0b1020 40%);
+    --kpi-grad:linear-gradient(135deg,var(--ink),#a9c2ff);
+    --metric-ink:#fff; --accent-ink:#cfe0ff;
+    --internal-ink:#ffd27a; --internal-bg:rgba(234,179,8,.08);
+    --banner-ink:#bdf3e6;
+  }
+  :root[data-theme="light"]{
+    --bg:#eef2fb; --panel:#ffffff; --panel2:#f1f5ff; --line:#dce3f3;
+    --ink:#1a2238; --muted:#5c6b8a; --brand:#3f6fe0; --brand2:#0f9d8f;
+    --shadow:0 6px 20px rgba(20,40,80,.10);
+    --page-grad:linear-gradient(180deg,#e9eefb,#f4f6fb 40%);
+    --kpi-grad:linear-gradient(135deg,#1a2238,#3f6fe0);
+    --metric-ink:#1a2238; --accent-ink:#2746a6;
+    --internal-ink:#8a6a12; --internal-bg:rgba(234,179,8,.13);
+    --banner-ink:#0f766e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--page-grad);color:var(--ink);-webkit-font-smoothing:antialiased}
+  a{color:var(--brand)}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+
+  header.hero{padding:26px 0 18px;border-bottom:1px solid var(--line);
+       background:radial-gradient(1200px 300px at 20% -40%,rgba(91,140,255,.18),transparent),
+                  radial-gradient(1000px 280px at 90% -60%,rgba(34,193,164,.16),transparent)}
+  .hero-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:20px;
+        background:linear-gradient(135deg,var(--brand),var(--brand2));color:#06122b;box-shadow:var(--shadow)}
+  .brand h1{margin:0;font-size:21px;letter-spacing:.2px}
+  .brand .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .hero-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:10px;
+       padding:9px 13px;font-size:13px;cursor:pointer;display:inline-flex;gap:7px;align-items:center;transition:.15s}
+  .btn:hover{border-color:var(--brand);transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(135deg,var(--brand),#3f6fe0);border-color:transparent;color:#fff}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+  .toggle input{appearance:none;width:38px;height:22px;border-radius:99px;background:var(--line);position:relative;cursor:pointer;transition:.2s}
+  .toggle input:checked{background:var(--brand)}
+  .toggle input::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+  .toggle input:checked::after{left:18px}
+
+  /* KPI band */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:22px 0}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--card-radius);padding:16px 18px;box-shadow:var(--shadow)}
+  .kpi .v{font-size:28px;font-weight:800;letter-spacing:.3px;
+          background:var(--kpi-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .kpi .l{color:var(--muted);font-size:12.5px;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+  /* Tabs */
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:8px;flex-wrap:wrap}
+  .tab{padding:11px 16px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;font-weight:600;font-size:14px}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--ink);border-color:var(--brand)}
+
+  /* Controls */
+  .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:18px 0 8px}
+  .search{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+          border-radius:10px;padding:9px 12px}
+  .search input{flex:1;background:transparent;border:0;outline:0;color:var(--ink);font-size:14px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin:6px 0 4px}
+  .chip{padding:6px 11px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--muted);
+        font-size:12.5px;cursor:pointer;transition:.12s;white-space:nowrap}
+  .chip:hover{color:var(--ink)}
+  .chip.active{background:var(--brand);border-color:transparent;color:#fff}
+  .chip-group{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .chip-group .lbl{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-right:2px}
+  .result-meta{color:var(--muted);font-size:13px;margin:4px 2px 14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .viewtoggle{margin-left:auto;display:flex;gap:4px}
+  .viewtoggle .btn{padding:6px 10px}
+
+  /* Agent cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--card-radius);padding:16px;
+        box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--accent,var(--brand))}
+  .card .c-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .card h3{margin:0;font-size:16px}
+  .card .fn{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .pill{font-size:11px;padding:3px 8px;border-radius:99px;border:1px solid var(--line);white-space:nowrap}
+  .pill.live{color:var(--live);border-color:rgba(34,197,94,.4)}
+  .pill.progress{color:var(--progress);border-color:rgba(234,179,8,.4)}
+  .pill.planned{color:var(--planned)}
+  .ba{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;font-size:12.5px}
+  .ba .b{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px}
+  .ba .b .t{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:3px}
+  .ba .arrow{color:var(--brand);font-size:18px;font-weight:700}
+  .metric{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(91,140,255,.12),rgba(34,193,164,.10));
+          border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+  .metric .mv{font-size:20px;font-weight:800;color:var(--metric-ink);min-width:64px}
+  .metric .ml{font-size:12px;color:var(--muted)}
+  .bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:5px}
+  .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+  .desc{color:#c8d3ee;font-size:13px;display:none}
+  .card.open .desc{display:block}
+  .more{align-self:flex-start;background:transparent;border:0;color:var(--brand);cursor:pointer;font-size:12.5px;padding:0}
+  .tag{font-size:11px;color:var(--muted)}
+  .internal{display:none;font-size:12px;color:var(--internal-ink);background:var(--internal-bg);border:1px dashed rgba(234,179,8,.4);
+            border-radius:8px;padding:7px 9px}
+  body.show-internal .internal{display:block}
+  .internal b{color:#ffe0a3}
+
+  /* Filter dropdowns */
+  .controls .flbl{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;align-self:center}
+  .dd{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13px;cursor:pointer}
+  .dd:hover{border-color:var(--brand)}
+
+  /* Category-grouped sections */
+  .group{margin:0 0 8px}
+  .group-head{display:flex;align-items:center;gap:10px;margin:22px 0 12px}
+  .group-head h2{font-size:17px;margin:0}
+  .group-count{font-size:12px;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:2px 10px}
+
+  /* Card additions (cards are now clickable, open the detail panel) */
+  .card{cursor:pointer;transition:transform .15s,border-color .15s}
+  .card:hover{border-color:var(--brand);transform:translateY(-2px)}
+  .ava{width:38px;height:38px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;font-weight:700;font-size:12.5px;
+       color:#fff;background:var(--accent,var(--brand))}
+  .c-title{flex:1;min-width:0}
+  .summary{color:var(--muted);font-size:13px}
+  .chips-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:auto;padding-top:4px}
+  .ind-chip{font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--brand);background:transparent}
+  .ind-more{font-size:11px;color:var(--muted)}
+
+  /* Slide-over detail panel */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .detail{position:fixed;top:0;right:0;height:100vh;width:min(500px,94vw);background:var(--bg);border-left:1px solid var(--line);
+          box-shadow:-12px 0 44px rgba(0,0,0,.4);transform:translateX(100%);transition:transform .25s ease;z-index:50;overflow-y:auto;padding:26px 26px 90px}
+  .detail.show{transform:translateX(0)}
+  .detail-close{position:absolute;top:16px;right:16px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+                width:34px;height:34px;border-radius:8px;font-size:18px;line-height:1;cursor:pointer}
+  .detail-close:hover{border-color:var(--brand)}
+  .detail h2{margin:0 36px 12px 0;font-size:22px}
+  .d-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .sec-t{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:20px 0 8px}
+  .about{font-size:14px;color:var(--ink)}
+  .d-ind{display:flex;gap:7px;flex-wrap:wrap}
+  .problem-box{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--progress);border-radius:8px;padding:12px;font-size:13.5px}
+  .ba2{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .ba2 .h{font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;font-weight:700}
+  .ba2 .bh{color:#ef6b6b;background:rgba(239,68,68,.10)}
+  .ba2 .ah{color:var(--live);background:rgba(34,197,94,.10)}
+  .ba2 .cell{padding:9px 12px;font-size:13px;border-top:1px solid var(--line)}
+  .ba2 .cell.b{border-right:1px solid var(--line)}
+  .cta{position:fixed;bottom:0;right:0;width:min(500px,94vw);box-sizing:border-box;display:block;text-align:center;
+       background:var(--ink);color:var(--bg);padding:15px;font-weight:700;text-decoration:none;border:0;cursor:pointer;font-size:14px}
+  .cta:hover{opacity:.92}
+
+  /* Table view */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;background:var(--bg)}
+  tbody tr:hover{background:var(--panel)}
+  .col-internal{display:none}
+  body.show-internal .col-internal{display:table-cell}
+
+  /* Category panels */
+  .cat{background:var(--panel);border:1px solid var(--line);border-radius:var(--card-radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .cat h3{margin:0 0 2px;font-size:18px}
+  .cat .meta{color:var(--muted);font-size:13px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .cat-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+  .cat-cols .box .t{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px}
+  .clientchip{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:4px 9px;
+              font-size:12px;margin:0 6px 6px 0}
+  .agentchip{display:inline-block;font-size:12px;color:var(--muted);margin:0 8px 4px 0}
+
+  /* Charts */
+  .charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin:6px 0 4px}
+  .chart{background:var(--panel);border:1px solid var(--line);border-radius:var(--card-radius);padding:16px;box-shadow:var(--shadow)}
+  .chart h4{margin:0 0 12px;font-size:14px}
+  .crow{display:grid;grid-template-columns:150px 1fr 46px;gap:10px;align-items:center;margin:7px 0;font-size:12.5px}
+  .crow .cbar{height:14px;border-radius:6px;background:var(--accent,var(--brand));min-width:3px}
+  .crow .cv{color:var(--muted);text-align:right}
+
+  /* ROI / differentiators */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:820px){.twocol{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--card-radius);padding:18px;box-shadow:var(--shadow)}
+  .panel h3{margin:0 0 12px;font-size:16px}
+  .roi-item,.diff-item{padding:10px 0;border-bottom:1px solid var(--line)}
+  .roi-item:last-child,.diff-item:last-child{border:0}
+  .roi-item .m{font-weight:600}
+  .roi-item .i{color:var(--brand2);font-size:13px}
+  .diff-item .ti{font-weight:600;color:var(--accent-ink)}
+  .diff-item .de{color:var(--muted);font-size:13px;margin-top:2px}
+
+  /* Dropzone */
+  .drop{display:none;border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--muted);
+        margin:14px 0;background:var(--panel)}
+  .drop.show{display:block}
+  .drop.hot{border-color:var(--brand);color:var(--ink);background:var(--panel2)}
+  .drop b{color:var(--ink)}
+
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:20px 0;color:var(--muted);font-size:13px;
+         display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  .hide{display:none!important}
+  .empty{text-align:center;color:var(--muted);padding:40px}
+  .banner{background:rgba(34,193,164,.12);border:1px solid rgba(34,193,164,.4);color:var(--banner-ink);border-radius:10px;
+          padding:9px 13px;font-size:13px;margin:12px 0;display:none}
+  .banner.show{display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .banner button{background:transparent;border:0;color:var(--banner-ink);cursor:pointer;font-size:13px;text-decoration:underline}
+
+  @media print{
+    body{background:#fff;color:#000}
+    .hero-actions,.controls,.chips,.tabs,.viewtoggle,.drop,.more,.banner{display:none!important}
+    .card,.cat,.panel,.chart,.kpi{break-inside:avoid;box-shadow:none;border-color:#ccc}
+    .desc{display:block!important}
+    *{color:#000!important;background:#fff!important}
+  }
+</style>
+<script>
+  /* Set theme before first paint to avoid a flash. */
+  (function(){
+    try{
+      var t=localStorage.getItem("theme");
+      if(!t) t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";
+      if(t==="light") document.documentElement.setAttribute("data-theme","light");
+    }catch(e){}
+  })();
+</script>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div class="brand">
+        <div class="logo">M</div>
+        <div>
+          <h1 id="m-title">Manifest AI Agent Portfolio</h1>
+          <div class="sub" id="m-subtitle"></div>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn" id="themeBtn" title="Switch between light and dark mode">🌙 Dark</button>
+        <label class="toggle" title="Reveal internal-only notes and roadmap">
+          <input type="checkbox" id="internalToggle"><span>Internal view</span>
+        </label>
+        <button class="btn" id="refreshBtn" title="Preview a newer spreadsheet without rebuilding">⬆ Load latest .xlsx</button>
+        <button class="btn" id="csvBtn">⬇ CSV</button>
+        <button class="btn" id="printBtn">🖨 Print / PDF</button>
+      </div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-view="agents">Agents</div>
+      <div class="tab" data-view="categories">Categories</div>
+      <div class="tab" data-view="insights">Insights</div>
+      <div class="tab internal-tab hide" data-view="roadmap">Roadmap</div>
+      <div class="tab" data-view="roi">ROI &amp; Differentiators</div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="banner" id="banner"></div>
+
+  <div class="drop" id="drop">
+    <p><b>Drop the latest <code>.xlsx</code> here</b> or <label style="color:var(--brand);cursor:pointer;text-decoration:underline">browse<input type="file" id="fileInput" accept=".xlsx" hidden></label></p>
+    <p style="font-size:12px;margin:4px 0 0">Loads in your browser only — nothing is uploaded. The shared link still shows the published data.</p>
+  </div>
+
+  <!-- AGENTS -->
+  <section id="view-agents">
+    <div class="controls">
+      <span class="flbl">Filter by</span>
+      <select class="dd" id="fCategory"></select>
+      <select class="dd" id="fIndustry"></select>
+      <select class="dd" id="fStatus"></select>
+      <div class="search">🔎<input id="q" type="search" placeholder="Search agents…"></div>
+      <div class="viewtoggle">
+        <button class="btn primary" id="gridViewBtn">▦ Cards</button>
+        <button class="btn" id="tableViewBtn">▤ Table</button>
+      </div>
+    </div>
+    <div class="result-meta"><span id="count"></span><button class="more" id="clearFilters">Clear filters</button></div>
+    <div id="agentGroups"></div>
+    <div id="agentTable" class="hide"></div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section id="view-categories" class="hide"></section>
+
+  <!-- INSIGHTS -->
+  <section id="view-insights" class="hide">
+    <div class="charts" id="charts"></div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section id="view-roadmap" class="hide"></section>
+
+  <!-- ROI -->
+  <section id="view-roi" class="hide">
+    <div class="twocol">
+      <div class="panel"><h3>Typical ROI Metrics</h3><div id="roiList"></div></div>
+      <div class="panel"><h3>Key Differentiators</h3><div id="diffList"></div></div>
+    </div>
+  </section>
+</main>
+
+<div class="overlay" id="overlay"></div>
+<aside class="detail" id="detail" aria-hidden="true">
+  <button class="detail-close" id="detailClose" aria-label="Close">×</button>
+  <div id="detailBody"></div>
+</aside>
+
+<footer class="wrap">
+  <span id="m-contact"></span>
+  <span id="m-generated"></span>
+</footer>
+
+<script>
+/* ============================================================
+   Bundled data — regenerated by build/build.py from the workbook.
+   ============================================================ */
+window.__DATA__ = {"meta": {"title": "Manifest AI Workspace 3.0 Agent Hub", "subtitle": "Enterprise Agentic AI", "contact": "www.manifestai.com", "generatedAt": "30 Jun 2026", "sourceFile": "Manifest_AI_Agents_Inventory.xlsx", "kpis": [{"label": "Total Agents", "value": "57+"}, {"label": "Live Clients", "value": "15+"}, {"label": "Production Users", "value": "10,000+"}, {"label": "Documents Processed/Month", "value": "100,000+"}, {"label": "Agent Categories", "value": "10"}], "keySectors": ["Banking & Financial Services", "Government & Defense", "Media & Publishing", "Manufacturing & Mining", "Superannuation & Pensions"], "roi": [{"metric": "Document Processing Time", "improvement": "85-90% reduction"}, {"metric": "Data Extraction Accuracy", "improvement": "98%+ (from 70-85%)"}, {"metric": "Underwriting Cycle Time", "improvement": "70-75% reduction"}, {"metric": "Billing Error Rates", "improvement": "95% reduction (10-15% to <1%)"}, {"metric": "Knowledge Search Time", "improvement": "95% reduction (4-6 hrs to seconds)"}, {"metric": "Overall Processing Costs", "improvement": "60-70% reduction"}], "differentiators": [{"title": "Production-Proven at Scale", "details": "10,000+ active users across 15+ enterprise deployments processing 100,000+ documents monthly"}, {"title": "98%+ Extraction Accuracy", "details": "Verified in production across multiple document types"}, {"title": "Format-Agnostic Intelligence", "details": "No pre-training required; handles diverse formats with no-code configuration"}, {"title": "Direct ERP/LOS Integration", "details": "NetSuite, SAP, custom banking systems — production-ready connectors"}, {"title": "Secure Govt/Defense Deployment", "details": "On-premise capabilities for sensitive environments"}, {"title": "Multi-Agent Orchestration", "details": "Agents work together seamlessly across workflows"}, {"title": "Rapid Time-to-Value", "details": "Typical deployment in 4-8 weeks from contract to production"}]}, "categories": [{"id": "CAT-01", "name": "Document Intelligence & Extraction", "industries": ["Banking & Financial Services", "Manufacturing & Resources"], "deployments": [{"client": "La Trobe Financial", "details": "10,000+ users"}, {"client": "Nasfund PNG", "details": ""}, {"client": "Aditya Birla Hindalco", "details": ""}, {"client": "Large Australian Bank", "details": ""}, {"client": "Credit Asset Management Co.", "details": ""}], "agentCount": 5, "status": "Live"}, {"id": "CAT-02", "name": "Financial Analysis & Underwriting", "industries": ["Banking & Financial Services"], "deployments": [{"client": "Sunlight Financial", "details": ""}, {"client": "Multiple Lending Banks", "details": ""}, {"client": "Commercial Underwriting Clients", "details": ""}, {"client": "Quantum Lending Solutions", "details": ""}], "agentCount": 5, "status": "Live"}, {"id": "CAT-03", "name": "Billing & Reconciliation Automation", "industries": ["Banking & Financial Services", "Manufacturing & Resources"], "deployments": [{"client": "Quantum Lending Solutions", "details": ""}, {"client": "US Banking Client", "details": ""}, {"client": "Nasfund", "details": "In progress"}, {"client": "Multiple Lending Organizations", "details": ""}], "agentCount": 5, "status": "In Progress"}, {"id": "CAT-04", "name": "Knowledge Discovery & Search", "industries": ["Government & Public Sector", "Manufacturing & Resources", "Media & Entertainment", "Cross-Industry"], "deployments": [{"client": "Mahanadi Coalfields", "details": "100+ users, 20,000+ documents"}, {"client": "Indian Navy", "details": ""}, {"client": "PostCourier Media", "details": ""}, {"client": "MyMedia", "details": ""}], "agentCount": 4, "status": "Live"}, {"id": "CAT-05", "name": "Content Intelligence & Media", "industries": ["Media & Entertainment"], "deployments": [{"client": "PostCourier", "details": "25 users"}, {"client": "MyMedia", "details": ""}], "agentCount": 7, "status": "Live"}, {"id": "CAT-06", "name": "Government & Program Management", "industries": ["Government & Public Sector", "Cross-Industry"], "deployments": [{"client": "PMO / NMCA Papua New Guinea", "details": "In development"}], "agentCount": 6, "status": "Planned"}, {"id": "CAT-07", "name": "Horizontal Agents", "industries": [], "deployments": [], "agentCount": 6, "status": "Planned"}, {"id": "CAT-08", "name": "BFSI", "industries": [], "deployments": [], "agentCount": 2, "status": "Planned"}, {"id": "CAT-09", "name": "ERP & Back-Office Finance", "industries": [], "deployments": [], "agentCount": 2, "status": "Planned"}, {"id": "CAT-10", "name": "Construction & Field Operations", "industries": [], "deployments": [], "agentCount": 15, "status": "Planned"}, {"id": "CAT-11", "name": "Procurement & Supply Chain", "industries": [], "deployments": [], "agentCount": 1, "status": "Planned"}], "agents": [{"id": "AGT-01", "name": "DocumentAI", "categoryId": "CAT-01", "categoryName": "Document Intelligence & Extraction", "businessFunction": "Document Extraction", "problem": "Manual data entry from invoices, bank statements, loan docs", "before": "3-4 days per document; 70-85% OCR accuracy", "after": "2-4 hours per document; 98%+ accuracy", "metric": "Processing Time Reduction", "metricValue": "85%", "metricPct": 85, "description": "AI-powered document extraction agent that automates data entry from invoices, bank statements, and loan documents. Replaces legacy OCR systems (70-85% accuracy, 3-4 day turnaround) with intelligent extraction achieving 98%+ accuracy in 2-4 hours — an 85% reduction in processing time.", "internalComment": "", "status": "Live"}, {"id": "AGT-02", "name": "Invoice AI", "categoryId": "CAT-01", "categoryName": "Document Intelligence & Extraction", "businessFunction": "AP Intelligence", "problem": "Manual invoice processing and data extraction", "before": "3-4 days per document; 20-30% manual validation", "after": "Format-agnostic extraction; >98% accuracy", "metric": "Extraction Accuracy", "metricValue": "98%+", "metricPct": null, "description": "Format-agnostic invoice processing agent that automatically extracts, validates, and structures data from any invoice format. Eliminates 3-4 day manual processing cycles and reduces manual validation from 20-30% to near-zero, delivering >98% extraction accuracy for AP workflows.", "internalComment": "", "status": "Live"}, {"id": "AGT-03", "name": "Bank Statement Analyzer", "categoryId": "CAT-01", "categoryName": "Document Intelligence & Extraction", "businessFunction": "Financial Data Extraction", "problem": "Manual bank statement analysis and data entry", "before": "Format-specific tools; high processing costs", "after": "Direct ERP/LOS integration; automated extraction", "metric": "Manual Validation Reduction", "metricValue": "90%", "metricPct": 90, "description": "Automated bank statement analysis agent that ingests statements in any format, extracts transaction data, and integrates directly with ERP/LOS systems. Replaces format-specific tools and high processing costs, reducing manual validation effort by 90%.", "internalComment": "", "status": "Live"}, {"id": "AGT-04", "name": "Credit Asset Doc Processor", "categoryId": "CAT-01", "categoryName": "Document Intelligence & Extraction", "businessFunction": "Credit Document Processing", "problem": "Processing backlogs of 72-96 hours in credit docs", "before": "Processing backlogs; 15-25% error rates", "after": "85% reduction in processing time", "metric": "Cost Reduction", "metricValue": "70%", "metricPct": 70, "description": "High-throughput credit document processing agent that clears 72-96 hour processing backlogs. Reduces error rates from 15-25% to near-zero and cuts processing time by 85%, with 70% overall cost reduction in credit asset documentation workflows.", "internalComment": "", "status": "Live"}, {"id": "AGT-05", "name": "Cashflow Agent", "categoryId": "CAT-01", "categoryName": "Document Intelligence & Extraction", "businessFunction": "Scalable Document Processing", "problem": "Inability to scale during peak periods", "before": "Legacy OCR; inability to scale", "after": "100,000+ documents/month throughput", "metric": "Documents Processed/Month", "metricValue": "100,000+", "metricPct": null, "description": "Scalable document processing agent capable of handling 100,000+ documents per month. Overcomes the inability of legacy OCR systems to scale during peak periods, providing elastic throughput without proportional staffing increases.", "internalComment": "", "status": "Live"}, {"id": "AGT-06", "name": "CashFlo AI", "categoryId": "CAT-02", "categoryName": "Financial Analysis & Underwriting", "businessFunction": "Cashflow Analysis", "problem": "Underwriters spend 6-8 hours per loan application", "before": "6-8 hours per application; manual spreadsheets", "after": "45-90 minutes per application; automated cashflow", "metric": "Analysis Time Reduction", "metricValue": "85%", "metricPct": 85, "description": "AI-driven cashflow analysis agent for lending underwriters. Transforms the 6-8 hour manual loan application review process into a 45-90 minute automated workflow, delivering 85% reduction in analysis time through intelligent cashflow modeling and automated data extraction.", "internalComment": "", "status": "Live"}, {"id": "AGT-07", "name": "Underwriting Agent", "categoryId": "CAT-02", "categoryName": "Financial Analysis & Underwriting", "businessFunction": "Credit Underwriting", "problem": "Manual calculation of debt service coverage ratios", "before": "Manual spreadsheet calculations; 14-21 day cycles", "after": "AI-driven risk recommendations; 3-5 day cycles", "metric": "Approval Cycle Reduction", "metricValue": "70%", "metricPct": 70, "description": "Intelligent underwriting agent that automates debt service coverage ratio calculations and risk recommendations. Compresses 14-21 day manual approval cycles to 3-5 days (70% reduction) by replacing spreadsheet-based workflows with AI-driven decisioning.", "internalComment": "", "status": "Live"}, {"id": "AGT-08", "name": "Risk Assessment Agent", "categoryId": "CAT-02", "categoryName": "Financial Analysis & Underwriting", "businessFunction": "Risk Management", "problem": "Inconsistent risk scoring across portfolio", "before": "Inconsistent risk scoring; limited fraud detection", "after": "Consistent AI-driven scoring; pattern-based fraud detection", "metric": "Underwriter Productivity Increase", "metricValue": "40%", "metricPct": 40, "description": "Portfolio-wide risk assessment agent that standardizes credit risk scoring and enhances fraud detection. Replaces inconsistent manual scoring with AI-driven consistent evaluations and pattern-based fraud identification, increasing underwriter productivity by 40%.", "internalComment": "", "status": "Live"}, {"id": "AGT-09", "name": "Credit Memo Generator", "categoryId": "CAT-02", "categoryName": "Financial Analysis & Underwriting", "businessFunction": "Credit Documentation", "problem": "Manual credit memo preparation", "before": "Manual credit memo preparation; massive backlogs", "after": "Automated credit memo generation", "metric": "Risk Scoring", "metricValue": "Consistent", "metricPct": null, "description": "Automated credit memo generation agent that eliminates manual preparation bottlenecks. Transforms backlogged, labor-intensive credit memo workflows into streamlined automated generation with consistent formatting and risk-appropriate content.", "internalComment": "", "status": "Live"}, {"id": "AGT-10", "name": "Financial Analysis Agent??", "categoryId": "CAT-02", "categoryName": "Financial Analysis & Underwriting", "businessFunction": "Fraud Detection", "problem": "Limited fraud pattern identification", "before": "Limited fraud detection capabilities", "after": "Enhanced AI pattern-based fraud detection", "metric": "Fraud Detection", "metricValue": "Enhanced", "metricPct": null, "description": "Advanced financial analysis agent with AI-powered fraud pattern identification. Enhances limited legacy fraud detection capabilities with sophisticated pattern recognition and anomaly detection across financial data sets.", "internalComment": "", "status": "Live"}, {"id": "AGT-11", "name": "Partner Billing Agent", "categoryId": "CAT-03", "categoryName": "Billing & Reconciliation Automation", "businessFunction": "Partner Billing", "problem": "Multi-partner billing with complex fee structures", "before": "40-60 hrs/month manual reconciliation", "after": "4-6 hrs/month oversight", "metric": "Reconciliation Time Reduction", "metricValue": "90%", "metricPct": 90, "description": "Multi-partner billing automation agent that handles complex fee structures across partner ecosystems. Reduces monthly reconciliation effort from 40-60 hours of manual work to 4-6 hours of oversight — a 90% time reduction.", "internalComment": "", "status": "In Progress"}, {"id": "AGT-12", "name": "E-Batch Creation Agent", "categoryId": "CAT-03", "categoryName": "Billing & Reconciliation Automation", "businessFunction": "Batch Billing", "problem": "Complex spreadsheet dependencies in billing", "before": "15-20 day billing cycles; complex spreadsheets", "after": "3-5 day billing cycles; ERP-ready outputs", "metric": "Billing Cycle Reduction", "metricValue": "75%", "metricPct": 75, "description": "Batch billing creation agent that automates complex spreadsheet-dependent billing processes. Compresses 15-20 day billing cycles to 3-5 days (75% reduction) and produces ERP-ready outputs, eliminating manual spreadsheet dependencies.", "internalComment": "", "status": "In Progress"}, {"id": "AGT-13", "name": "Payment Reconciliation Agent", "categoryId": "CAT-03", "categoryName": "Billing & Reconciliation Automation", "businessFunction": "Payment Reconciliation", "problem": "10-15% billing error rates", "before": "10-15% billing error rates", "after": "<1% error rates", "metric": "Billing Error Reduction", "metricValue": "95%", "metricPct": 95, "description": "Intelligent payment reconciliation agent that matches and validates transactions across systems. Reduces billing error rates from 10-15% to less than 1% — a 95% error reduction — through automated cross-system validation.", "internalComment": "", "status": "In Progress"}, {"id": "AGT-14", "name": "3-Way Matching Agent", "categoryId": "CAT-03", "categoryName": "Billing & Reconciliation Automation", "businessFunction": "AP Intelligence", "problem": "Revenue leakage from missed fees and partner disputes due to manual matching", "before": "Manual PO/invoice/receipt matching; revenue leakage from missed fees; partner disputes", "after": "Automated three-way matching with <1% error rates; audit-ready outputs", "metric": "Matching Accuracy", "metricValue": "99%+", "metricPct": null, "description": "Automated three-way matching agent that reconciles purchase orders, invoices, and receiving documents for accounts payable intelligence and audit compliance.", "internalComment": "", "status": "In Progress"}, {"id": "AGT-15", "name": "Knowledge Discovery Agent", "categoryId": "CAT-04", "categoryName": "Knowledge Discovery & Search", "businessFunction": "Enterprise Search", "problem": "10,000-50,000+ docs with no effective search", "before": "4-6 hours to locate documents; keyword-only", "after": "Instant semantic search; natural language queries", "metric": "Search Time Reduction", "metricValue": "95%", "metricPct": 95, "description": "Semantic search and knowledge discovery agent that indexes 10,000-50,000+ documents and enables natural language queries. Replaces 4-6 hour keyword-only document searches with instant semantic retrieval — a 95% reduction in search time.", "internalComment": "", "status": "Live"}, {"id": "AGT-16", "name": "Topic/Article Search Agent", "categoryId": "CAT-04", "categoryName": "Knowledge Discovery & Search", "businessFunction": "Knowledge Management", "problem": "Policies, SOPs buried in legacy systems", "before": "No semantic understanding; siloed repositories", "after": "Unified knowledge base; cross-document intelligence", "metric": "Documents Indexed", "metricValue": "20,000+", "metricPct": null, "description": "Intelligent topic and article search agent that unifies siloed document repositories into a single semantic knowledge base. Enables cross-document intelligence and indexes 20,000+ documents with full contextual understanding beyond simple keyword matching.", "internalComment": "", "status": "Live"}, {"id": "AGT-17", "name": "Policy QA Agent??", "categoryId": "CAT-04", "categoryName": "Knowledge Discovery & Search", "businessFunction": "Compliance & Policy", "problem": "Compliance risk from outdated documents", "before": "Compliance risk from outdated docs", "after": "Source citation & compliance tracking", "metric": "Concurrent Users", "metricValue": "100+", "metricPct": null, "description": "Policy quality assurance agent that ensures compliance by tracking document currency, providing source citations, and flagging outdated policies. Supports 100+ concurrent users for enterprise-scale compliance verification.", "internalComment": "", "status": "Live"}, {"id": "AGT-18", "name": "Secure Knowledge Management??", "categoryId": "CAT-04", "categoryName": "Knowledge Discovery & Search", "businessFunction": "Secure Knowledge Management", "problem": "No systematic retrieval capability", "before": "Siloed repositories; no systematic retrieval", "after": "Secure on-premise deployment; NL understanding", "metric": "Deployment Security", "metricValue": "On-premise ready", "metricPct": null, "description": "Secure on-premise knowledge management agent with natural language understanding. Provides systematic document retrieval from siloed repositories while maintaining data sovereignty through local deployment — ideal for regulated industries.", "internalComment": "", "status": "Live"}, {"id": "AGT-19", "name": "Topic Summary Agent", "categoryId": "CAT-05", "categoryName": "Content Intelligence & Media", "businessFunction": "Content Summarization", "problem": "Journalists spend 60-70% time on routine tasks", "before": "Manual content discovery processes", "after": "Automated content summarization", "metric": "Editorial Time Savings", "metricValue": "50-60%", "metricPct": null, "description": "Automated topic summarization agent for newsrooms and editorial teams. Reduces 60-70% of routine journalist tasks by automating content discovery and generating concise, publishable summaries — saving 50-60% of editorial time.", "internalComment": "", "status": "Live"}, {"id": "AGT-20", "name": "Grammar Correction", "categoryId": "CAT-05", "categoryName": "Content Intelligence & Media", "businessFunction": "Editorial Quality", "problem": "Manual proofreading consumes editorial bandwidth", "before": "Manual proofreading", "after": "Real-time grammar assistance", "metric": "Proofreading Time Reduction", "metricValue": "90%+", "metricPct": null, "description": "Real-time grammar correction agent that replaces manual proofreading workflows. Delivers instant, context-aware grammar assistance to editorial teams, enabling 90% faster content review and freeing bandwidth for higher-value work.", "internalComment": "", "status": "Live"}, {"id": "AGT-21", "name": "Paraphrasing", "categoryId": "CAT-05", "categoryName": "Content Intelligence & Media", "businessFunction": "Content Repurposing", "problem": "Time-intensive content repurposing", "before": "Time-intensive content repurposing", "after": "One-click content repurposing", "metric": "Content Delivery", "metricValue": "Multi-format", "metricPct": null, "description": "AI-powered paraphrasing and content repurposing agent that transforms time-intensive rewriting into one-click multi-format content generation. Enables rapid content adaptation across channels and audiences.", "internalComment": "", "status": "Live"}, {"id": "AGT-22", "name": "AI Audio", "categoryId": "CAT-05", "categoryName": "Content Intelligence & Media", "businessFunction": "Audio Production", "problem": "External audio services with 48-72 hr turnaround", "before": "External audio (48-72 hr turnaround)", "after": "Instant audio generation", "metric": "Audio Generation", "metricValue": "Instant", "metricPct": null, "description": "Instant AI audio generation agent that replaces external audio services with 48-72 hour turnaround times. Produces broadcast-ready audio content on demand, eliminating vendor dependencies and accelerating multimedia publishing.", "internalComment": "", "status": "Live"}, {"id": "AGT-23", "name": "Media Report Generator", "categoryId": "CAT-05", "categoryName": "Content Intelligence & Media", "businessFunction": "Media Reporting", "problem": "No systematic archive search capability", "before": "Limited archive search", "after": "Intelligent archive search", "metric": "Investigative Time", "metricValue": "Increased", "metricPct": null, "description": "Intelligent media report generation agent with advanced archive search capabilities. Replaces limited archive search with AI-powered intelligent retrieval, increasing time available for investigative journalism.", "internalComment": "", "status": "Live"}, {"id": "AGT-24", "name": "Fact Checker", "categoryId": "CAT-05", "categoryName": "Content Intelligence & Media", "businessFunction": "Editorial Verification", "problem": "Manual fact-verification", "before": "Manual fact-verification", "after": "Automated fact-checking", "metric": "Fact-Checking", "metricValue": "Automated", "metricPct": null, "description": "Automated fact-checking agent that verifies claims against trusted sources in real time. Replaces manual fact-verification processes with AI-driven automated validation, improving editorial accuracy and speed.", "internalComment": "", "status": "Live"}, {"id": "AGT-25", "name": "Email Reporting", "categoryId": "CAT-05", "categoryName": "Content Intelligence & Media", "businessFunction": "Stakeholder Communications", "problem": "Limited time for investigative work", "before": "Manual email report generation", "after": "Automated email reporting", "metric": "Content Formats", "metricValue": "Multi-format", "metricPct": null, "description": "Automated email reporting agent that generates and distributes multi-format content reports. Eliminates manual email report generation, enabling consistent, scheduled delivery across stakeholder groups.", "internalComment": "", "status": "Live"}, {"id": "AGT-26", "name": "Financial Analysis Agent (Govt)??", "categoryId": "CAT-06", "categoryName": "Government & Program Management", "businessFunction": "Government Financial Analysis", "problem": "Data from 50+ agencies; no consolidated view", "before": "3-4 weeks for consolidated reports", "after": "Real-time dashboard generation", "metric": "Report Generation Reduction", "metricValue": "90%", "metricPct": 90, "description": "Government financial analysis agent that consolidates data from 50+ agencies into real-time dashboards. Replaces 3-4 week manual report generation cycles with instant consolidated views — a 90% reduction in report generation time.", "internalComment": "", "status": "Planned"}, {"id": "AGT-27", "name": "Health Data Analysis Agent", "categoryId": "CAT-06", "categoryName": "Government & Program Management", "businessFunction": "Health Program Analytics", "problem": "Disconnected financial and health data", "before": "Manual data aggregation from 50+ sources", "after": "Automated data integration; cross-program analysis", "metric": "Multi-Agency Visibility", "metricValue": "Real-time", "metricPct": null, "description": "Health data analysis agent that integrates disconnected financial and health program data across 50+ sources. Enables automated cross-program analysis combining health, finance, and infrastructure data with real-time multi-agency visibility.", "internalComment": "", "status": "Planned"}, {"id": "AGT-28", "name": "AI Sheet Generator", "categoryId": "CAT-06", "categoryName": "Government & Program Management", "businessFunction": "Government Reporting", "problem": "3-4 weeks to produce national oversight reports", "before": "Disconnected financial and health data", "after": "Cross-program analysis (health + finance + infra)", "metric": "Anomaly Detection", "metricValue": "Automated", "metricPct": null, "description": "AI-powered spreadsheet and report generation agent for government oversight. Transforms 3-4 week national reporting cycles into automated executive report generation with built-in anomaly detection across cross-program data.", "internalComment": "", "status": "Planned"}, {"id": "AGT-29", "name": "AI Docs Generator", "categoryId": "CAT-06", "categoryName": "Government & Program Management", "businessFunction": "Government Documentation", "problem": "Delayed intervention responses", "before": "No geospatial program tracking", "after": "AI-generated executive reports", "metric": "Intervention Response", "metricValue": "Faster", "metricPct": null, "description": "Automated government document generation agent with AI-driven executive report creation. Accelerates intervention responses by providing faster, data-informed reporting for program management decision-making.", "internalComment": "", "status": "Planned"}, {"id": "AGT-30", "name": "Geospatial Analysis Agent", "categoryId": "CAT-06", "categoryName": "Government & Program Management", "businessFunction": "Geospatial Intelligence", "problem": "No geospatial program tracking", "before": "Delayed intervention responses", "after": "Geospatial program mapping & visualization", "metric": "Program Oversight", "metricValue": "Geospatial", "metricPct": null, "description": "Geospatial analysis agent that adds location-based intelligence to government program tracking. Enables geographic visualization of program performance, replacing manual analysis with interactive geospatial mapping and oversight capabilities.", "internalComment": "", "status": "Planned"}, {"id": "AGT-31", "name": "Nuvola e-sign Agent", "categoryId": "CAT-07", "categoryName": "Horizontal Agents", "businessFunction": "Digital Signatures", "problem": "", "before": "", "after": "", "metric": "", "metricValue": "", "metricPct": null, "description": "Digital signature and e-sign workflow agent that automates document signing processes across enterprise workflows, providing secure, auditable electronic signature capabilities.", "internalComment": "", "status": "Planned"}, {"id": "AGT-32", "name": "Analytics Agent", "categoryId": "CAT-07", "categoryName": "Horizontal Agents", "businessFunction": "Business Intelligence", "problem": "", "before": "", "after": "", "metric": "", "metricValue": "", "metricPct": null, "description": "Cross-platform analytics agent that provides AI-powered data analysis, visualization, and insight generation across enterprise datasets for data-driven decision-making.", "internalComment": "", "status": "Planned"}, {"id": "AGT-33", "name": "Workflow Agent (AI DMS)", "categoryId": "CAT-07", "categoryName": "Horizontal Agents", "businessFunction": "Document Management", "problem": "Manual document routing, approvals, and task assignments causing delays and missed SLAs", "before": "Manual routing and approval chains; email-based task tracking; no audit trail", "after": "AI-driven automated routing, approval workflows, and task assignment with full audit trail", "metric": "Workflow Cycle Time Reduction", "metricValue": "70%", "metricPct": 70, "description": "Intelligent workflow orchestration agent that automates document management system (DMS) processes, routing, approvals, and task assignments using AI-driven workflow logic.", "internalComment": "", "status": "Planned"}, {"id": "AGT-34", "name": "Communications Agent", "categoryId": "CAT-07", "categoryName": "Horizontal Agents", "businessFunction": "Enterprise Communications", "problem": "Fragmented internal/external communications with no centralized automation", "before": "Manual drafting and sending of notifications; inconsistent messaging across channels", "after": "Automated multi-channel communications with consistent messaging and smart routing", "metric": "Communication Turnaround Reduction", "metricValue": "60%", "metricPct": 60, "description": "AI-powered communications agent that automates internal and external messaging, notifications, and stakeholder communications across enterprise channels.", "internalComment": "", "status": "Planned"}, {"id": "AGT-35", "name": "Content Management Agent", "categoryId": "CAT-07", "categoryName": "Horizontal Agents", "businessFunction": "Content Operations", "problem": "Manual content creation, versioning, and distribution across multiple channels", "before": "Manual content versioning; siloed repositories; inconsistent distribution", "after": "Automated content lifecycle management with AI-powered versioning and multi-channel distribution", "metric": "Content Publishing Time Reduction", "metricValue": "65%", "metricPct": 65, "description": "Enterprise content management agent that automates content creation, organization, versioning, and distribution across digital channels and repositories.", "internalComment": "", "status": "Planned"}, {"id": "AGT-36", "name": "KYC / AML Compliance Agent", "categoryId": "CAT-08", "categoryName": "BFSI", "businessFunction": "Regulatory Compliance", "problem": "Manual document verification, PEP/sanctions screening, and risk profiling consuming days per customer", "before": "Manual KYC checks; 2-3 days per customer; fragmented screening tools; high false positive rates", "after": "Automated document verification, real-time PEP/sanctions screening, and AI risk profiling", "metric": "KYC Processing Time Reduction", "metricValue": "80%", "metricPct": 80, "description": "KYC and anti-money laundering compliance agent that automates document verification, PEP/sanctions screening, risk profiling, and suspicious transaction alerting. Streamlines regulatory compliance workflows for financial institutions.", "internalComment": "", "status": "Planned"}, {"id": "AGT-37", "name": "Loan Origination Document Agent??", "categoryId": "CAT-08", "categoryName": "BFSI", "businessFunction": "Loan Processing", "problem": "End-to-end loan application document extraction, validation, and decisioning bottlenecks", "before": "Manual document review; 5-7 day processing per application; high error rates in data capture", "after": "AI-powered document extraction with automated validation and decisioning support", "metric": "Loan Processing Time Reduction", "metricValue": "75%", "metricPct": 75, "description": "End-to-end loan origination document agent that automates application document extraction, validation, and decisioning support for BFSI workflows. Accelerates loan processing by replacing manual document review with AI-powered data capture and compliance checks across the origination pipeline.", "internalComment": "", "status": "Planned"}, {"id": "AGT-38", "name": "Data Quality / Cleansing Agent", "categoryId": "CAT-07", "categoryName": "Horizontal Agents", "businessFunction": "Data Management", "problem": "Poor data quality causing downstream errors — duplicates, missing values, inconsistent formats", "before": "Manual data cleansing; 15-20% duplicate rates; inconsistent master data across systems", "after": "Automated duplicate detection, standardization, missing value imputation, and master data hygiene", "metric": "Data Quality Improvement", "metricValue": "90%", "metricPct": 90, "description": "Automated data quality and cleansing agent that detects duplicates, standardizes formats, imputes missing values, and maintains master data hygiene. Ensures enterprise data reliability by continuously monitoring and remediating data integrity issues across systems.", "internalComment": "", "status": "Planned"}, {"id": "AGT-39", "name": "Expense Management Agent??", "categoryId": "CAT-09", "categoryName": "ERP & Back-Office Finance", "businessFunction": "Expense Processing", "problem": "Manual receipt processing, policy compliance checking, and reimbursement workflows", "before": "Manual receipt entry; 3-5 day reimbursement cycles; frequent policy violations undetected", "after": "AI-powered receipt extraction, auto-categorization, policy compliance, and ERP-ready reimbursement", "metric": "Expense Processing Time Reduction", "metricValue": "80%", "metricPct": 80, "description": "Intelligent expense management agent that automates receipt extraction, policy compliance checking, auto-categorization, and reimbursement workflows. Eliminates manual expense processing by integrating AI-powered validation with ERP-ready output for seamless back-office finance operations.", "internalComment": "", "status": "Planned"}, {"id": "AGT-40", "name": "AI Presentation Agent", "categoryId": "CAT-06", "categoryName": "Government & Program Management", "businessFunction": "Executive Reporting", "problem": "Manual creation of executive presentations from program data across multiple agencies", "before": "Manual slide creation; 1-2 weeks per executive presentation; inconsistent formatting across agencies", "after": "AI-generated executive presentations with real-time data integration and consistent formatting", "metric": "Presentation Generation Time Reduction", "metricValue": "85%", "metricPct": 85, "description": "AI-powered presentation generation agent that automates executive slide creation from cross-agency program data. Replaces 1-2 week manual presentation cycles with instant AI-generated outputs, ensuring consistent formatting and real-time data integration for government program oversight.", "internalComment": "", "status": "Planned"}, {"id": "AGT-40A", "name": "Bank Reconciliation Agent", "categoryId": "CAT-03", "categoryName": "Billing & Reconciliation Automation", "businessFunction": "Bank Reconciliation", "problem": "Manual bank reconciliation with no automated matching of transactions across bank statements and general ledger", "before": "Manual bank-to-GL matching; unreconciled items pile up; month-end close delayed; high error rates", "after": "Automated transaction matching across bank statements and GL; exceptions flagged; audit-ready reconciliation", "metric": "Reconciliation Time Reduction", "metricValue": "85%", "metricPct": 85, "description": "Automated bank reconciliation agent that matches transactions between bank statements and the general ledger, flags unreconciled exceptions, and produces audit-ready reconciliation reports. Eliminates manual bank-to-GL matching, accelerates month-end close, and reduces reconciliation errors across enterprise banking relationships.", "internalComment": "", "status": "In Progress"}, {"id": "AGT-41", "name": "Opportunity Scanner", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Tender & Bid Intelligence", "problem": "Manual monitoring of tender portals across multiple sources with no automated scoring or fit assessment", "before": "Manual portal checks; no fit scoring; missed tenders; days to compile shortlist", "after": "Automated tender capture across portals; AI-scored by fit, value and region", "metric": "Tender Capture Time Reduction", "metricValue": "80%", "metricPct": 80, "description": "AI-powered opportunity scanning agent that monitors tender portals across sources and automatically captures, scores, and shortlists tenders by fit, value, and region. Eliminates manual portal monitoring and ensures no opportunities are missed.", "internalComment": "HL Landscapes / R1 Sprint 2", "status": "Planned"}, {"id": "AGT-42", "name": "Quote Builder", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Estimating & Pricing", "problem": "Manual itemised Bill of Quantities (BoQ) build from scope documents using spreadsheets and historical rate lookups", "before": "Manual BoQ creation; no rate automation; inconsistent supplier pricing; hours per quote", "after": "AI-generated itemised BoQ from scope; pulls historic rates and live supplier pricing automatically", "metric": "Quote Preparation Time Reduction", "metricValue": "75%", "metricPct": 75, "description": "Automated quote building agent that generates itemised Bills of Quantities directly from scope documents, pulling historic rates and supplier pricing. Replaces manual spreadsheet-based estimating with AI-driven BoQ generation for faster, more accurate tender pricing.", "internalComment": "HL Landscapes / R1 Sprint 2", "status": "Planned"}, {"id": "AGT-43", "name": "Bid Response Agent", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Bid & Tender Response", "problem": "Manual bid preparation with no compliance matrix automation or reuse of past winning responses", "before": "Manual bid writing; no compliance auto-check; past wins not systematically reused; days per response", "after": "Auto-completed compliance matrices; reuses past wins; flags gaps before submission", "metric": "Bid Preparation Time Reduction", "metricValue": "70%", "metricPct": 70, "description": "Intelligent bid response agent that auto-completes compliance matrices, surfaces and reuses past winning responses, and flags gaps before submission. Transforms days-long manual bid writing into a streamlined, AI-assisted process that improves win rates and reduces effort.", "internalComment": "HL Landscapes / R1 Sprint 3", "status": "Planned"}, {"id": "AGT-44", "name": "Margin Analyser", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Bid Risk & Margin Analysis", "problem": "No systematic pre-submission margin analysis or risk surfacing against benchmark pricing", "before": "Manual margin checks; benchmark pricing not automated; bid risk not quantified before submission", "after": "AI benchmark pricing comparison; surfaces bid risk and margin exposure before submission", "metric": "Bid Risk Identification", "metricValue": "85%", "metricPct": 85, "description": "Margin analysis agent that benchmarks pricing against historical and market rates, surfaces bid risk, and highlights margin exposure before submission. Ensures construction bids are competitively priced without sacrificing profitability.", "internalComment": "HL Landscapes / R1 Sprint 3", "status": "Planned"}, {"id": "AGT-45", "name": "Contract Management", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Contract Lifecycle Management", "problem": "Manual management of customer and supplier contracts with no automated tracking of terms, expiries or compliance obligations", "before": "Manual contract filing; missed renewal dates; no obligation tracking; compliance gaps undetected", "after": "Automated contract management; tracks terms, expiries and compliance obligations across customer and supplier contracts", "metric": "Contract Compliance Coverage", "metricValue": "90%", "metricPct": 90, "description": "Construction-focused contract management agent that manages the full lifecycle of customer and supplier contracts. Tracks terms, expiry dates, and compliance obligations automatically — reducing missed renewals and compliance risk across the project portfolio.", "internalComment": "HL Landscapes / R1 Sprint 4", "status": "Planned"}, {"id": "AGT-46", "name": "Purchase Orders", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Procurement & PO Management", "problem": "Manual PO creation and approval routing across subcontractors and suppliers on construction projects", "before": "Manual PO raising; slow approval chains; no automated supplier matching or delivery tracking", "after": "Automated PO generation, approval routing and delivery tracking for construction procurement", "metric": "PO Processing Time Reduction", "metricValue": "70%", "metricPct": 70, "description": "Construction procurement agent that automates purchase order creation, approval routing, and delivery tracking across subcontractors and suppliers. Eliminates manual PO administration and ensures procurement compliance on construction projects.", "internalComment": "HL Landscapes / R1 Sprint 4", "status": "Planned"}, {"id": "AGT-47", "name": "Payment Claims Management", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Payment Claims & Variations", "problem": "Manual detection of scope changes and change order processing, leading to revenue leakage and disputes", "before": "Manual scope change tracking; delayed change orders; disputed claims; revenue leakage from missed variations", "after": "Automated scope change detection; AI-priced and routed change orders; payment claims management", "metric": "Revenue Leakage Reduction", "metricValue": "80%", "metricPct": 80, "description": "Payment claims management agent that detects scope changes early, auto-prices and routes change orders, and manages the full payment claims process. Reduces revenue leakage from missed variations and accelerates claims resolution on construction projects.", "internalComment": "HL Landscapes / R1 Sprint 4", "status": "Planned"}, {"id": "AGT-48", "name": "Time Capture / Resource Scheduler", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Resource & Workforce Scheduling", "problem": "Manual crew and equipment scheduling with no automated workload balancing or clash resolution", "before": "Manual shift allocation; equipment clashes unresolved; workload imbalances; scheduling bottlenecks", "after": "AI-optimised crew and equipment allocation; workload balanced; scheduling clashes auto-resolved", "metric": "Scheduling Efficiency Improvement", "metricValue": "65%", "metricPct": 65, "description": "Resource scheduling agent that allocates crews and equipment across construction projects using AI optimisation. Balances workloads, resolves scheduling clashes, and captures time against cost centres — replacing manual rostering with intelligent field resource management.", "internalComment": "HL Landscapes / R2 Sprint 5", "status": "Planned"}, {"id": "AGT-49", "name": "Progress Tracker", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Field Progress & Reporting", "problem": "No real-time field progress visibility; plan vs actual comparison done manually and retrospectively", "before": "Manual site progress reporting; no geo-tagging; plan vs actual analysis days behind; no live view", "after": "Geo-tagged field progress capture; live plan vs actual comparison; real-time site visibility", "metric": "Reporting Lag Reduction", "metricValue": "90%", "metricPct": 90, "description": "Field progress tracking agent that captures geo-tagged site progress and compares plan vs actual in real time. Replaces retrospective manual reporting with live field visibility, enabling earlier intervention on delays and better project control.", "internalComment": "HL Landscapes / R2 Sprint 5", "status": "Planned"}, {"id": "AGT-50", "name": "Cost Monitor", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Project Cost Control", "problem": "Cost tracking done manually by cost centre with no automated overrun alerts or completion forecasting", "before": "Manual cost reporting; overruns identified late; no automated forecast-to-complete; reactive cost control", "after": "Real-time actuals tracking by cost centre; automated overrun alerts; forecast-to-complete projections", "metric": "Cost Overrun Detection Speed", "metricValue": "85%", "metricPct": 85, "description": "Project cost monitoring agent that tracks actuals by cost centre in real time, alerts on overruns, and projects forecast-to-complete. Transforms reactive cost reporting into proactive cost control across the construction project portfolio.", "internalComment": "HL Landscapes / R1 Sprint 4", "status": "Planned"}, {"id": "AGT-51", "name": "Registers (Incidents & OHS)", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Safety & Compliance Registers", "problem": "Manual incident and OHS register management with no automated safety action tracking or risk surfacing", "before": "Paper or spreadsheet registers; safety actions manually tracked; site-level compliance gaps undetected", "after": "Automated incident capture and OHS registers; safety action tracking; site compliance monitoring", "metric": "Safety Compliance Coverage", "metricValue": "90%", "metricPct": 90, "description": "Safety and compliance registers agent that automates incident capture, OHS register management, safety action tracking, and site-level compliance monitoring. Replaces manual paper-based registers with a fully auditable, AI-assisted safety management system for construction sites.", "internalComment": "HL Landscapes / R1 Sprint 4", "status": "Planned"}, {"id": "AGT-52", "name": "Invoice Generator", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Construction Invoicing", "problem": "Manual invoice creation from milestones and timesheets with manual GST, retention, and branding application", "before": "Manual invoice preparation; errors in GST and retentions; inconsistent branding; slow billing cycles", "after": "Automated invoice generation from milestones and timesheets; GST, retentions and branding auto-applied", "metric": "Invoice Generation Time Reduction", "metricValue": "80%", "metricPct": 80, "description": "Construction invoice generation agent that converts milestones and timesheets into compliant invoices, automatically applying GST, retentions, and client branding. Eliminates manual invoice preparation errors and accelerates billing cycles for construction projects.", "internalComment": "HL Landscapes / R1 Sprint 4", "status": "Planned"}, {"id": "AGT-53", "name": "Xero / XPNA Sync", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "ERP & Accounting Integration", "problem": "Manual invoice export and import between project management systems and Xero accounting platform", "before": "Manual data re-entry into Xero; sync delays; reconciliation errors; no automated push", "after": "Automated invoice push to Xero / XPNA; real-time sync; reconciliation errors eliminated", "metric": "Manual Data Entry Elimination", "metricValue": "95%", "metricPct": 95, "description": "Xero and XPNA accounting integration agent that automatically pushes invoices and financial data from construction workflows to Xero. Eliminates manual re-entry, sync delays, and reconciliation errors between project management and accounting systems.", "internalComment": "HL Landscapes / R1 Sprint 4", "status": "Planned"}, {"id": "AGT-54", "name": "Cashflow Forecaster", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Construction Cashflow Management", "problem": "Manual cashflow modelling with no rolling forecast or automated inflow/outflow tracking against project milestones", "before": "Spreadsheet-based cashflow; no rolling 13-week view; inflows, outflows and retentions tracked manually", "after": "Automated cashflow modelling; inflows, outflows and retentions tracked; rolling 13-week forecast maintained", "metric": "Cashflow Visibility", "metricValue": "85%", "metricPct": 85, "description": "Construction cashflow forecasting agent that models inflows, outflows, and retentions against project milestones and maintains a rolling 13-week cashflow view. Replaces manual spreadsheet forecasting with an always-current, automated cashflow dashboard for construction finance.", "internalComment": "HL Landscapes / R1 Sprint 4", "status": "Planned"}, {"id": "AGT-55", "name": "Compliance & Reconciliation (AP)", "categoryId": "CAT-10", "categoryName": "Construction & Field Operations", "businessFunction": "Accounts Payable Compliance", "problem": "Manual AP rate auditing and invoice reconciliation with exceptions queued manually for review", "before": "Manual rate and anomaly checks pre-invoice; exception queues managed manually; 2-way match done by hand", "after": "Automated rate and anomaly auditing pre-invoice; 2-way match AP; exceptions auto-queued for review", "metric": "AP Error Rate Reduction", "metricValue": "90%", "metricPct": 90, "description": "Construction AP compliance and reconciliation agent that audits rates and anomalies pre-invoice, performs automated 2-way match across purchase orders and invoices, and queues exceptions for review. Reduces AP errors and ensures payment accuracy across construction subcontractor and supplier payments.", "internalComment": "HL Landscapes / R1 Sprint 4", "status": "Planned"}, {"id": "AGT-56", "name": "Contract (Supplier) Agent", "categoryId": "CAT-11", "categoryName": "Procurement & Supply Chain", "businessFunction": "Supplier Contract Management", "problem": "Manual supplier contract management with no automated clause extraction, obligation tracking or renewal alerting", "before": "Manual contract filing; missed renewal dates; clause obligations not tracked; risk exposure undetected", "after": "AI-powered extraction, clause identification, obligation tracking, renewal alerts and risk flagging across supplier contracts", "metric": "Contract Risk Coverage", "metricValue": "85%", "metricPct": 85, "description": "AI-powered supplier contract agent that extracts clauses, identifies obligations, tracks renewals, and flags risk across the supplier contract portfolio. Replaces manual filing and ad-hoc tracking with automated lifecycle management and proactive alerts.", "internalComment": "ERP Agent", "status": "Planned"}, {"id": "AGT-57", "name": "Contract (Customer) Agent", "categoryId": "CAT-09", "categoryName": "ERP & Back-Office Finance", "businessFunction": "Customer Contract Management", "problem": "Manual management of customer contracts with no automated revenue term extraction, SLA monitoring or renewal management", "before": "Manual customer contract filing; SLA breaches undetected; auto-renewals missed; revenue terms not systematically tracked", "after": "Automated customer contract analysis; revenue term extraction; SLA monitoring; auto-renewal management and compliance tracking", "metric": "SLA Breach Prevention", "metricValue": "80%", "metricPct": 80, "description": "Customer contract management agent that automates revenue term extraction, SLA monitoring, auto-renewal management, and compliance tracking across the customer contract portfolio. Prevents missed renewals and SLA breaches through continuous AI-driven contract oversight.", "internalComment": "ERP Agent", "status": "Planned"}], "backlog": [{"n": "1", "name": "Contract (Supplier) Agent", "description": "AI-powered supplier contract extraction, clause identification, obligation tracking, renewal alerts, and risk flagging", "category": "Procurement & Supply Chain", "erpFlag": true, "internalComment": "Moved to Live inventory — AGT-56", "sprint": ""}, {"n": "2", "name": "Contract (Customer) Agent", "description": "Customer contract analysis, revenue term extraction, SLA monitoring, auto-renewal management, and compliance tracking", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "Moved to Live inventory — AGT-57", "sprint": ""}, {"n": "3", "name": "Capex Workflow Agent", "description": "Capital expenditure request workflow automation, budget validation, multi-level approval routing, and ERP posting", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "4", "name": "Asset Management Agent", "description": "Fixed asset register management, depreciation scheduling, asset tagging, disposal tracking, and audit-ready reporting", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "5", "name": "Patch Mgmt", "description": "??", "category": "Horizontal", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "6", "name": "Payments Agent", "description": "End-to-end payment processing automation, payment run scheduling, bank file generation, and remittance advice distribution", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "7", "name": "TBD – Consulting-Led AI", "description": "Configurable AI agent framework for bespoke consulting engagements — custom workflow design, domain-specific model tuning", "category": "Horizontal", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "8", "name": "TBD – Inventory Review", "description": "Automated inventory audit, stock discrepancy detection, cycle count scheduling, and write-off recommendation generation", "category": "Procurement & Supply Chain", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "9", "name": "Accounts Receivable (AR) Agent", "description": "AI-powered invoice-to-cash tracking, payment follow-ups, aging analysis, and customer credit management", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "10", "name": "General Ledger (GL) Reconciliation Agent", "description": "Automated GL account reconciliation, variance detection, journal entry matching across sub-ledgers", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "11", "name": "Expense Management Agent", "description": "Receipt extraction, policy compliance checking, auto-categorization, and reimbursement workflow", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "already part of agent inventory", "sprint": ""}, {"n": "12", "name": "Tax Compliance Agent", "description": "Automated GST/VAT computation, TDS reconciliation, regulatory filing preparation across jurisdictions", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "13", "name": "Budget Forecasting Agent", "description": "AI-driven budget vs. actual analysis, rolling forecasts, variance alerts, and scenario modelling", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "14", "name": "Intercompany Eliminations Agent", "description": "Automated matching and elimination of intercompany transactions for consolidated reporting", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "15", "name": "Revenue Recognition Agent", "description": "ASC 606/IFRS 15 compliant revenue recognition, contract analysis, and deferred revenue scheduling", "category": "ERP & Back-Office Finance", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "16", "name": "Employee Onboarding Agent", "description": "Document collection, ID verification, offer letter generation, checklist automation for new hires", "category": "HR & People Ops", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "17", "name": "Leave & Attendance Agent", "description": "Automated leave balance tracking, attendance anomaly detection, shift compliance monitoring", "category": "HR & People Ops", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "18", "name": "Payroll Processing Agent", "description": "Payroll calculation, statutory deduction computation, payslip generation, and bank file creation", "category": "HR & People Ops", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "19", "name": "Talent Screening / Resume Parser Agent", "description": "AI extraction from CVs, candidate scoring against JD requirements, shortlist recommendations", "category": "HR & People Ops", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "20", "name": "HR Policy Compliance Agent", "description": "Policy Q&A for employees, compliance monitoring, automated alerts for policy violations", "category": "HR & People Ops", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "21", "name": "Performance Review Agent", "description": "360-degree feedback aggregation, goal tracking, review summary generation, and calibration support", "category": "HR & People Ops", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "22", "name": "Purchase Order Agent", "description": "Auto-generation of POs from requisitions, approval routing, supplier matching, and delivery tracking", "category": "Procurement & Supply Chain", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "23", "name": "Vendor Onboarding & Due Diligence Agent", "description": "Vendor document verification, risk scoring, compliance checks, and master data creation", "category": "Procurement & Supply Chain", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "24", "name": "Inventory Forecasting Agent", "description": "Demand prediction, reorder point optimization, stockout/overstock alerts, seasonal pattern analysis", "category": "Procurement & Supply Chain", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "25", "name": "Goods Receipt & Inspection Agent", "description": "Automated GRN matching, quality inspection documentation, and discrepancy flagging", "category": "Procurement & Supply Chain", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "26", "name": "RFQ / Bid Comparison Agent", "description": "Multi-vendor quote extraction, side-by-side comparison, scoring, and recommendation generation", "category": "Procurement & Supply Chain", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "27", "name": "Mine Safety & Incident Reporting Agent", "description": "Automated incident capture, root cause analysis, safety trend detection, regulatory report generation", "category": "Mining", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "28", "name": "Environmental Compliance Agent", "description": "Emissions tracking, environmental clearance document management, regulatory deadline monitoring", "category": "Mining", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "29", "name": "Equipment Maintenance / Predictive Agent", "description": "Maintenance log analysis, failure prediction, spare parts forecasting, downtime scheduling", "category": "Mining", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "30", "name": "Shift Roster & Workforce Planning Agent", "description": "AI-optimized shift scheduling, fatigue management compliance, skill-based crew allocation", "category": "Mining", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "31", "name": "Geological Survey Document Agent", "description": "Extraction and analysis of geological reports, drill data, mineral assay results, and mapping data", "category": "Mining", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "32", "name": "Citizen Services / Grievance Agent", "description": "Automated grievance classification, routing, response drafting, and SLA tracking", "category": "Public Sector", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "33", "name": "Tender & Procurement Compliance Agent", "description": "Tender document analysis, compliance checklist automation, bid evaluation support", "category": "Public Sector", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "34", "name": "RTI / FOI Response Agent", "description": "Right to Information request processing, document retrieval, response drafting with citations", "category": "Public Sector", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "35", "name": "Regulatory Filing Agent", "description": "Automated preparation and validation of statutory filings, deadline tracking, submission workflows", "category": "Public Sector", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "36", "name": "Public Fund Disbursement Tracker Agent", "description": "Fund flow tracking across agencies, utilization analysis, leakage detection, audit trail generation", "category": "Public Sector", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "37", "name": "KYC / AML Compliance Agent", "description": "Document verification, PEP/sanctions screening, risk profiling, and suspicious transaction alerts", "category": "BFSI", "erpFlag": false, "internalComment": "already part of agent inventory", "sprint": ""}, {"n": "38", "name": "Loan Origination Document Agent", "description": "End-to-end loan application document extraction, validation, and decisioning support", "category": "BFSI", "erpFlag": false, "internalComment": "already part of agent inventory", "sprint": ""}, {"n": "39", "name": "Claims Processing Agent (Insurance)", "description": "Claims document extraction, fraud pattern detection, settlement calculation, and adjudication support", "category": "BFSI", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "40", "name": "Regulatory Reporting Agent", "description": "Automated regulatory return preparation, data validation, and submission-ready report generation", "category": "BFSI", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "41", "name": "Customer Complaint Resolution Agent", "description": "Complaint classification, sentiment analysis, response drafting, and escalation management", "category": "BFSI", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "42", "name": "Portfolio Monitoring Agent", "description": "Real-time portfolio risk monitoring, covenant tracking, early warning alerts, and exposure analysis", "category": "BFSI", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "43", "name": "Ad Revenue Reconciliation Agent", "description": "Automated matching of ad orders, delivery reports, and billing; revenue leakage detection", "category": "Media", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "44", "name": "Content Rights & Licensing Agent", "description": "License expiry tracking, rights clearance verification, usage compliance, and renewal alerts", "category": "Media", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "45", "name": "Audience Analytics Agent", "description": "Readership/viewership pattern analysis, content performance scoring, engagement trend detection", "category": "Media", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "46", "name": "Editorial Calendar / Planning Agent", "description": "AI-suggested editorial calendar, topic gap analysis, deadline tracking, resource allocation", "category": "Media", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "47", "name": "Audit Trail & Compliance Agent", "description": "Automated audit log analysis, compliance gap detection, evidence gathering, and report generation", "category": "Horizontal", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "48", "name": "SLA Monitoring Agent", "description": "Real-time SLA tracking across vendors/partners, breach prediction, escalation triggers", "category": "Horizontal", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "49", "name": "Customer Onboarding Agent", "description": "Document collection, KYC/verification, account setup automation, and welcome workflow", "category": "Horizontal", "erpFlag": true, "internalComment": "", "sprint": ""}, {"n": "50", "name": "Notification & Escalation Agent", "description": "Intelligent alert routing, escalation workflows, multi-channel notifications, and digest summaries", "category": "Horizontal", "erpFlag": false, "internalComment": "", "sprint": ""}, {"n": "51", "name": "Data Quality / Cleansing Agent", "description": "Duplicate detection, data standardization, missing value imputation, and master data hygiene", "category": "Horizontal", "erpFlag": true, "internalComment": "already part of agent inventory", "sprint": ""}, {"n": "52", "name": "Report Scheduling & Distribution Agent", "description": "Automated report generation, scheduling, multi-format output, and role-based distribution", "category": "Horizontal", "erpFlag": false, "internalComment": "", "sprint": ""}]};
+</script>
+<script>
+/* ============================================================
+   Dependency-free XLSX reader (ZIP + DecompressionStream) so the
+   "Load latest .xlsx" feature needs no external libraries.
+   ============================================================ */
+const Xlsx = (() => {
+  const dv = (b)=>new DataView(b);
+  async function inflateRaw(bytes){
+    if(typeof DecompressionStream==="undefined") throw new Error("This browser can't read .xlsx in-page (no DecompressionStream).");
+    const ds=new DecompressionStream("deflate-raw");
+    const stream=new Response(new Blob([bytes]).stream().pipeThrough(ds));
+    return new Uint8Array(await stream.arrayBuffer());
+  }
+  async function unzip(buf){
+    const data=new Uint8Array(buf), view=dv(buf);
+    // find End Of Central Directory
+    let eocd=-1;
+    for(let i=data.length-22;i>=0;i--){ if(view.getUint32(i,true)===0x06054b50){eocd=i;break;} }
+    if(eocd<0) throw new Error("Not a valid .xlsx (zip) file.");
+    const count=view.getUint16(eocd+10,true);
+    let off=view.getUint32(eocd+16,true);
+    const files={};
+    for(let n=0;n<count;n++){
+      if(view.getUint32(off,true)!==0x02014b50) break;
+      const method=view.getUint16(off+10,true);
+      const csize=view.getUint32(off+20,true);
+      const nameLen=view.getUint16(off+28,true);
+      const extraLen=view.getUint16(off+30,true);
+      const commentLen=view.getUint16(off+32,true);
+      const lho=view.getUint32(off+42,true);
+      const name=new TextDecoder().decode(data.subarray(off+46,off+46+nameLen));
+      files[name]={method,csize,lho};
+      off+=46+nameLen+extraLen+commentLen;
+    }
+    const out={};
+    for(const name in files){
+      const f=files[name];
+      const lvNameLen=view.getUint16(f.lho+26,true);
+      const lvExtraLen=view.getUint16(f.lho+28,true);
+      const start=f.lho+30+lvNameLen+lvExtraLen;
+      const comp=data.subarray(start,start+f.csize);
+      out[name]=f.method===0?comp:await inflateRaw(comp);
+    }
+    return out;
+  }
+  const parseXml=(u8)=>new DOMParser().parseFromString(new TextDecoder().decode(u8),"application/xml");
+  function colToNum(ref){ // "B12" -> 1 (0-based col)
+    let c=0;for(const ch of ref){const u=ch.charCodeAt(0); if(u>=65&&u<=90)c=c*26+(u-64); else break;} return c-1;
+  }
+  async function readSheets(buf){
+    const z=await unzip(buf);
+    // shared strings
+    const shared=[];
+    if(z["xl/sharedStrings.xml"]){
+      const doc=parseXml(z["xl/sharedStrings.xml"]);
+      for(const si of doc.getElementsByTagName("si")){
+        // concatenate all <t> (handles rich text runs)
+        let s="";for(const t of si.getElementsByTagName("t"))s+=t.textContent;
+        shared.push(s);
+      }
+    }
+    // workbook -> sheet name to rId
+    const wbDoc=parseXml(z["xl/workbook.xml"]);
+    const relDoc=parseXml(z["xl/_rels/workbook.xml.rels"]);
+    const relMap={};
+    for(const r of relDoc.getElementsByTagName("Relationship")) relMap[r.getAttribute("Id")]=r.getAttribute("Target");
+    const sheets={};
+    for(const sh of wbDoc.getElementsByTagName("sheet")){
+      const nm=sh.getAttribute("name");
+      const rid=sh.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id")||sh.getAttribute("r:id");
+      let target=relMap[rid]; if(!target) continue;
+      if(!target.startsWith("xl/")) target="xl/"+target.replace(/^\//,"");
+      const doc=parseXml(z[target]); if(!doc) continue;
+      const rows=[];
+      for(const row of doc.getElementsByTagName("row")){
+        const cells=[];
+        for(const c of row.getElementsByTagName("c")){
+          const ref=c.getAttribute("r")||""; const idx=colToNum(ref);
+          const type=c.getAttribute("t");
+          const v=c.getElementsByTagName("v")[0];
+          let val=null;
+          if(type==="s"){ val=v?shared[parseInt(v.textContent,10)]:""; }
+          else if(type==="inlineStr"){ const t=c.getElementsByTagName("t")[0]; val=t?t.textContent:""; }
+          else if(v){ const num=parseFloat(v.textContent); val=isNaN(num)?v.textContent:num; }
+          cells[idx]=val;
+        }
+        rows.push(cells);
+      }
+      sheets[nm]=rows;
+    }
+    return sheets;
+  }
+  return {readSheets};
+})();
+</script>
+<script>
+/* ============================================================
+   In-browser normalization — mirrors build/convert.py so an
+   uploaded workbook produces the same data shape.
+   ============================================================ */
+const s=v=>{ if(v==null) return ""; let t=String(v).trim();
+  if(t.indexOf("Deep")>=0){ t=t.replace(/\s*\bDeep(?:Delve|Probe)\b\s*/g," ").trim();
+    const m=t.match(/^\((.*)\)$/); if(m) t=m[1].trim(); }
+  return t; };
+// Mirrors INDUSTRY_MAP / consolidate_industries in build/convert.py.
+const INDUSTRY_MAP={"Banking":"Banking & Financial Services","Lending":"Banking & Financial Services",
+  "Mortgage Lending":"Banking & Financial Services","Commercial Lending":"Banking & Financial Services",
+  "Fintech":"Banking & Financial Services","Financial Services":"Banking & Financial Services",
+  "Superannuation":"Banking & Financial Services","Government Finance":"Banking & Financial Services",
+  "Government":"Government & Public Sector","Defense":"Government & Public Sector","Public Health":"Government & Public Sector",
+  "National Programs":"Government & Public Sector","Development Projects":"Government & Public Sector",
+  "Media":"Media & Entertainment","Broadcasting":"Media & Entertainment","Digital Media":"Media & Entertainment",
+  "Publishing":"Media & Entertainment","Content Creation":"Media & Entertainment",
+  "Manufacturing":"Manufacturing & Resources","Mining":"Manufacturing & Resources",
+  "Multi-sector Enterprise":"Cross-Industry","Multi-sector Coordination":"Cross-Industry"};
+const consolidateIndustries=raw=>{ const out=[]; raw.forEach(i=>{const x=INDUSTRY_MAP[i]||i; if(!out.includes(x))out.push(x);}); return out; };
+function normMetric(raw){
+  if(raw==null) return ["",null];
+  if(typeof raw==="number"){ if(raw>0&&raw<=1){const p=Math.round(raw*100);return [p+"%",p];} return [String(raw),null]; }
+  return [String(raw).trim(),null];
+}
+function depStatus(blob){
+  const t=blob.toLowerCase();
+  if(/to be deployed|in development|tbd|planned/.test(t)) return "Planned";
+  if(t.includes("progress")||t.includes("development")) return "In Progress";
+  if(/user|client|document|progress|live/.test(t)) return "Live";
+  return "Planned";
+}
+function normalizeWorkbook(sheets){
+  // Master Data: first row per CategoryID = definition; later rows carry industries.
+  const mdNames={},industries={},deployments={};
+  let section=null;
+  for(const row of (sheets["Master Data"]||[])){
+    const c0=s(row[0]),c1=s(row[1]),c2=s(row[2]),c3=s(row[3]);
+    if(c0.startsWith("TABLE 1")){section="cat";continue;}
+    if(c0.startsWith("TABLE 4")){section="dep";continue;}
+    if(c0==="CategoryID"||c0==="DeploymentID"||!c0) continue;
+    if(section==="cat"&&c0.startsWith("CAT-")){
+      if(!(c0 in mdNames)){ mdNames[c0]=c1; }
+      else if(c2){ (industries[c0]=industries[c0]||[]); if(!industries[c0].includes(c2))industries[c0].push(c2); }
+    } else if(section==="dep"&&c0.startsWith("DEP-")){
+      (deployments[c1]=deployments[c1]||[]).push({client:c2,details:c3});
+    }
+  }
+  // Agents
+  const agents=[],catNames={};
+  const inv=sheets["Agent Inventory Live"]||[];
+  for(const row of inv.slice(2)){
+    const id=s(row[0]); if(!id||!id.toUpperCase().startsWith("AGT-"))continue;
+    const cid=s(row[2]),cname=s(row[3]); if(cid&&!(cid in catNames))catNames[cid]=cname;
+    const [label,pct]=normMetric(row[9]);
+    agents.push({id,name:s(row[1]),categoryId:cid,categoryName:cname,businessFunction:s(row[4]),
+      problem:s(row[5]),before:s(row[6]),after:s(row[7]),metric:s(row[8]),metricValue:label,metricPct:pct,
+      description:s(row[10]),internalComment:s(row[11])});
+  }
+  // Backlog
+  const backlog=[];
+  for(const row of (sheets["Agents Backlog"]||[]).slice(1)){
+    const name=s(row[1]); if(!name)continue;
+    backlog.push({n:s(row[0]),name,description:s(row[2]),category:s(row[3]),
+      erpFlag:["yes","true","y"].includes(s(row[4]).toLowerCase()),internalComment:s(row[5]),sprint:s(row[6])});
+  }
+  // Summary
+  const kpis=[],sectors=[],roi=[],diffs=[];
+  let sec=null;
+  for(const row of (sheets["Summary Dashboard"]||[])){
+    const c0=s(row[0]),c1=s(row[1]),c3=s(row[3]);const h=c0.toUpperCase();
+    if(h.startsWith("DEPLOYMENT SUMMARY")){sec="deploy";continue;}
+    if(h.startsWith("TYPICAL ROI")){sec="roi";continue;}
+    if(h.startsWith("KEY DIFFERENTIATORS")){sec="diff";continue;}
+    if(c0.startsWith("Contact")){sec=null;continue;}
+    if(sec==="deploy"){ if(c0&&c0!=="Metric"&&c1)kpis.push({label:c0,value:c1}); if(c3&&c3!=="Key Sectors")sectors.push(c3); }
+    else if(sec==="roi"){ if(c0&&c0!=="Efficiency Metric"&&c1)roi.push({metric:c0,improvement:c1}); }
+    else if(sec==="diff"){ if(c0&&c0!=="Differentiator"&&c1)diffs.push({title:c0,details:c1}); }
+  }
+  // Categories
+  const catIds=new Set([...Object.keys(catNames),...Object.keys(mdNames),...Object.keys(industries),...Object.keys(deployments)]);
+  const byCat={}; agents.forEach(a=>byCat[a.categoryId]=(byCat[a.categoryId]||0)+1);
+  const categories=[...catIds].sort().map(cid=>{
+    const deps=deployments[cid]||[];
+    const status=deps.length?depStatus(deps.map(d=>d.client+" "+d.details).join(" ")):"Planned";
+    return {id:cid,name:catNames[cid]||mdNames[cid]||cid,
+      industries:consolidateIndustries(industries[cid]||[]),deployments:deps,agentCount:byCat[cid]||0,status};
+  });
+  const look={}; categories.forEach(c=>look[c.id]=c);
+  agents.forEach(a=>{const c=look[a.categoryId]; a.status=c?c.status:"Planned";});
+  return {meta:{title:"Manifest AI Workspace 3.0 Agent Hub",subtitle:"Enterprise Agentic AI",
+      contact:"www.manifestai.com",generatedAt:new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),
+      sourceFile:"(in-browser preview)",kpis,keySectors:sectors,roi,differentiators:diffs},
+    categories,agents,backlog};
+}
+</script>
+<script>
+/* ============================================================
+   Dashboard UI
+   ============================================================ */
+const STATUS_CLASS={Live:"live","In Progress":"progress",Planned:"planned"};
+const STATUS_COLOR={Live:"#22c55e","In Progress":"#eab308",Planned:"#94a3b8"};
+const CAT_PALETTE=["#5b8cff","#22c1a4","#c084fc","#f59e0b","#ef4444","#14b8a6","#8b5cf6","#3b82f6","#ec4899","#10b981","#f97316"];
+const catColor=id=>CAT_PALETTE[(parseInt(String(id).replace(/\D/g,""),10)||0)%CAT_PALETTE.length];
+let DATA, filters, catById={};
+
+function resetFilters(){ filters={q:"",status:null,cat:null,industry:null,view:"agents",layout:"grid"}; }
+
+// Each agent inherits the industries defined for its category in the workbook.
+function agentIndustries(a){ const c=catById[a.categoryId]; return c?c.industries:[]; }
+function allIndustries(){ const s=new Set(); DATA.categories.forEach(c=>c.industries.forEach(i=>s.add(i))); return [...s].sort(); }
+function initials(name){
+  const w=String(name).trim().split(/\s+/);
+  return (w.length>1 ? (w[0][0]+w[1][0]) : name.slice(0,2)).toUpperCase();
+}
+
+function init(data){
+  DATA=data;
+  resetFilters();
+  catById={}; DATA.categories.forEach(c=>catById[c.id]=c);
+  // meta
+  document.getElementById("m-title").textContent=data.meta.title;
+  document.getElementById("m-subtitle").textContent=data.meta.subtitle;
+  document.getElementById("m-contact").textContent=data.meta.contact;
+  document.getElementById("m-generated").textContent="Data as of "+data.meta.generatedAt+" · source: "+data.meta.sourceFile;
+  renderKpis(); renderFilters(); renderCategories(); renderInsights(); renderRoadmap(); renderRoi();
+  readHash();
+  apply();
+}
+
+function renderKpis(){
+  document.getElementById("kpis").innerHTML=DATA.meta.kpis.map(k=>
+    `<div class="kpi"><div class="v">${esc(k.value)}</div><div class="l">${esc(k.label)}</div></div>`).join("");
+}
+
+function renderFilters(){
+  const opt=(v,label,sel)=>`<option value="${esc(v)}"${sel?" selected":""}>${esc(label)}</option>`;
+  document.getElementById("fCategory").innerHTML=
+    opt("","All categories")+DATA.categories.map(c=>opt(c.id,`${c.name} (${c.agentCount})`)).join("");
+  document.getElementById("fIndustry").innerHTML=
+    opt("","All industries")+allIndustries().map(i=>opt(i,i)).join("");
+  document.getElementById("fStatus").innerHTML=
+    opt("","All statuses")+["Live","In Progress","Planned"].map(s=>opt(s,s)).join("");
+}
+
+function filteredAgents(){
+  const q=filters.q.toLowerCase();
+  return DATA.agents.filter(a=>{
+    if(filters.status && a.status!==filters.status) return false;
+    if(filters.cat && a.categoryId!==filters.cat) return false;
+    if(filters.industry && !agentIndustries(a).includes(filters.industry)) return false;
+    if(q){ const blob=(a.name+" "+a.businessFunction+" "+a.problem+" "+a.description+" "+a.categoryName).toLowerCase();
+           if(!blob.includes(q)) return false; }
+    return true;
+  });
+}
+
+function apply(){
+  // sync dropdowns to filter state
+  document.getElementById("fCategory").value=filters.cat||"";
+  document.getElementById("fIndustry").value=filters.industry||"";
+  document.getElementById("fStatus").value=filters.status||"";
+  // tabs / sections
+  ["agents","categories","insights","roadmap","roi"].forEach(v=>{
+    document.getElementById("view-"+v).classList.toggle("hide",v!==filters.view);
+  });
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view===filters.view));
+  if(filters.view==="agents") renderAgents();
+  writeHash();
+}
+
+function renderAgents(){
+  const list=filteredAgents();
+  document.getElementById("count").textContent=`Showing ${list.length} of ${DATA.agents.length} agents`;
+  const groups=document.getElementById("agentGroups"), tbl=document.getElementById("agentTable");
+  const showTable=filters.layout==="table";
+  groups.classList.toggle("hide",showTable); tbl.classList.toggle("hide",!showTable);
+  document.getElementById("gridViewBtn").classList.toggle("primary",!showTable);
+  document.getElementById("tableViewBtn").classList.toggle("primary",showTable);
+  if(!list.length){ groups.innerHTML=tbl.innerHTML='<div class="empty">No agents match your filters.</div>'; return; }
+  if(showTable){ renderAgentTable(list); return; }
+  // group cards by category, in the canonical category order
+  groups.innerHTML=DATA.categories.map(c=>{
+    const items=list.filter(a=>a.categoryId===c.id);
+    if(!items.length) return "";
+    return `<div class="group">
+      <div class="group-head"><h2>${esc(c.name)}</h2><span class="group-count">${items.length} agent${items.length>1?"s":""}</span></div>
+      <div class="grid">${items.map(agentCard).join("")}</div>
+    </div>`;
+  }).join("");
+  groups.querySelectorAll(".card").forEach(card=>card.addEventListener("click",()=>openDetail(card.dataset.id)));
+}
+
+function agentCard(a){
+  const sc=STATUS_CLASS[a.status]||"planned", accent=catColor(a.categoryId);
+  const inds=agentIndustries(a);
+  const chips=inds.slice(0,3).map(i=>`<span class="ind-chip">${esc(i)}</span>`).join("")
+    +(inds.length>3?`<span class="ind-more">+${inds.length-3}</span>`:"");
+  return `<div class="card" data-id="${esc(a.id)}" style="--accent:${accent}">
+    <div class="c-head">
+      <div class="ava">${esc(initials(a.name))}</div>
+      <div class="c-title"><h3>${esc(a.name)}</h3><div class="fn">${esc(a.categoryName)}</div></div>
+      <span class="pill ${sc}">${esc(a.status)}</span>
+    </div>
+    <div class="summary">${esc(a.businessFunction)}</div>
+    <div class="chips-row">${chips||'<span class="ind-more">—</span>'}</div>
+  </div>`;
+}
+
+/* ---------- slide-over detail panel ---------- */
+function openDetail(id){
+  const a=DATA.agents.find(x=>x.id===id); if(!a) return;
+  const inds=agentIndustries(a);
+  const bLines=String(a.before).split(/;|\n/).map(x=>x.trim()).filter(Boolean);
+  const aLines=String(a.after).split(/;|\n/).map(x=>x.trim()).filter(Boolean);
+  const n=Math.max(bLines.length,aLines.length,1);
+  let baRows="";
+  for(let i=0;i<n;i++) baRows+=`<div class="cell b">${esc(bLines[i]||"")}</div><div class="cell">${esc(aLines[i]||"")}</div>`;
+  const metric = a.metricValue ? `<div class="sec-t">Key Metric</div>
+      <div class="metric"><div class="mv">${esc(a.metricValue)}</div>
+        <div><div class="ml">${esc(a.metric)||"Key metric"}</div>
+        ${a.metricPct!=null?`<div class="bar"><span style="width:${a.metricPct}%"></span></div>`:""}</div></div>` : "";
+  const site = /^https?:/.test(DATA.meta.contact) ? DATA.meta.contact : "https://"+DATA.meta.contact.replace(/^\/+/,"");
+  document.getElementById("detailBody").innerHTML=`
+    <h2>${esc(a.name)}</h2>
+    <div class="d-chips">
+      <span class="pill ${STATUS_CLASS[a.status]||'planned'}">${esc(a.status)}</span>
+      <span class="pill" style="color:${catColor(a.categoryId)};border-color:${catColor(a.categoryId)}66">${esc(a.categoryName)}</span>
+    </div>
+    <div class="sec-t">About this agent</div>
+    <div class="about">${esc(a.description)||esc(a.businessFunction)}</div>
+    ${inds.length?`<div class="sec-t">Industries</div><div class="d-ind">${inds.map(i=>`<span class="ind-chip">${esc(i)}</span>`).join("")}</div>`:""}
+    ${a.problem?`<div class="sec-t">The problem it solves</div><div class="problem-box">${esc(a.problem)}</div>`:""}
+    ${(bLines.length||aLines.length)?`<div class="sec-t">Before &amp; After</div>
+      <div class="ba2"><div class="h bh">Before</div><div class="h ah">After</div>${baRows}</div>`:""}
+    ${metric}
+    ${a.internalComment?`<div class="internal" style="display:block;margin-top:18px"><b>Internal:</b> ${esc(a.internalComment)}</div>`:""}
+    <a class="cta" href="${esc(site)}" target="_blank" rel="noopener">Book a Demo →</a>`;
+  document.getElementById("detail").classList.add("show");
+  document.getElementById("detail").setAttribute("aria-hidden","false");
+  document.getElementById("overlay").classList.add("show");
+  filters.agent=id; writeHash();
+}
+function closeDetail(){
+  document.getElementById("detail").classList.remove("show");
+  document.getElementById("detail").setAttribute("aria-hidden","true");
+  document.getElementById("overlay").classList.remove("show");
+  filters.agent=null; writeHash();
+}
+
+function renderAgentTable(list){
+  const rows=list.map(a=>`<tr>
+    <td><b>${esc(a.name)}</b><div class="tag">${esc(a.id)}</div></td>
+    <td>${esc(a.categoryName)}</td><td>${esc(a.businessFunction)}</td>
+    <td>${esc(a.metricValue)} <span class="tag">${esc(a.metric)}</span></td>
+    <td><span class="pill ${STATUS_CLASS[a.status]||'planned'}">${esc(a.status)}</span></td>
+    <td class="col-internal">${esc(a.internalComment)}</td></tr>`).join("");
+  document.getElementById("agentTable").innerHTML=`<table><thead><tr>
+    <th>Agent</th><th>Category</th><th>Function</th><th>Key Metric</th><th>Status</th>
+    <th class="col-internal">Internal notes</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderCategories(){
+  document.getElementById("view-categories").innerHTML=DATA.categories.map(c=>{
+    const agents=DATA.agents.filter(a=>a.categoryId===c.id);
+    const clients=c.deployments.map(d=>`<span class="clientchip">${esc(d.client)}${d.details?` · ${esc(d.details)}`:""}</span>`).join("")||'<span class="tag">No live deployments yet</span>';
+    const inds=c.industries.map(i=>`<span class="agentchip">${esc(i)}</span>`).join("")||'<span class="tag">—</span>';
+    const ag=agents.map(a=>`<span class="agentchip">• ${esc(a.name)}</span>`).join("");
+    return `<div class="cat">
+      <h3>${esc(c.name)}</h3>
+      <div class="meta"><span class="pill ${STATUS_CLASS[c.status]||'planned'}">${esc(c.status)}</span>
+        <span class="tag">${c.agentCount} agents · ${c.deployments.length} deployments</span></div>
+      <div class="cat-cols">
+        <div class="box"><div class="t">Agents</div>${ag||'<span class="tag">—</span>'}</div>
+        <div class="box"><div class="t">Industries</div>${inds}</div>
+        <div class="box"><div class="t">Live Deployments</div>${clients}</div>
+      </div></div>`;
+  }).join("");
+}
+
+function renderInsights(){
+  const byCat=DATA.categories.map(c=>({label:c.name,value:c.agentCount,color:catColor(c.id)})).filter(x=>x.value).sort((a,b)=>b.value-a.value);
+  const stMap={}; DATA.agents.forEach(a=>stMap[a.status]=(stMap[a.status]||0)+1);
+  const byStatus=Object.entries(stMap).map(([k,v])=>({label:k,value:v,color:STATUS_COLOR[k]})).sort((a,b)=>b.value-a.value);
+  const byDep=DATA.categories.map(c=>({label:c.name,value:c.deployments.length,color:catColor(c.id)})).filter(x=>x.value).sort((a,b)=>b.value-a.value);
+  document.getElementById("charts").innerHTML=
+    chart("Agents by category",byCat)+
+    chart("Agents by deployment status",byStatus)+chart("Live client deployments by category",byDep);
+}
+function chart(title,rows){
+  const max=Math.max(1,...rows.map(r=>r.value));
+  const body=rows.map(r=>`<div class="crow"><span title="${esc(r.label)}">${esc(r.label)}</span>
+    <span class="cbar" style="width:${(r.value/max*100).toFixed(1)}%;background:${r.color||'#5b8cff'}"></span>
+    <span class="cv">${r.value}</span></div>`).join("");
+  return `<div class="chart"><h4>${esc(title)}</h4>${body||'<div class="tag">No data</div>'}</div>`;
+}
+
+function renderRoadmap(){
+  const groups={};
+  DATA.backlog.forEach(b=>{ (groups[b.category||"Uncategorized"]=groups[b.category||"Uncategorized"]||[]).push(b); });
+  const html=Object.entries(groups).map(([cat,items])=>{
+    const rows=items.map(b=>`<tr>
+      <td><b>${esc(b.name)}</b>${b.erpFlag?' <span class="pill" style="color:#c084fc">ERP</span>':""}
+        <div class="tag">${esc(b.description)}</div></td>
+      <td>${esc(b.sprint)||'<span class="tag">TBD</span>'}</td>
+      <td class="col-internal">${esc(b.internalComment)}</td></tr>`).join("");
+    return `<div class="cat"><h3>${esc(cat)} <span class="tag">(${items.length})</span></h3>
+      <table><thead><tr><th>Agent</th><th>Go-Live Sprint</th><th class="col-internal">Internal notes</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+  }).join("");
+  document.getElementById("view-roadmap").innerHTML=
+    `<div class="banner show" style="position:static">🔒 Roadmap & backlog — internal view only. Toggle "Internal view" off before sharing externally.<span></span></div>`+html;
+}
+
+function renderRoi(){
+  document.getElementById("roiList").innerHTML=DATA.meta.roi.map(r=>
+    `<div class="roi-item"><div class="m">${esc(r.metric)}</div><div class="i">${esc(r.improvement)}</div></div>`).join("");
+  document.getElementById("diffList").innerHTML=DATA.meta.differentiators.map(d=>
+    `<div class="diff-item"><div class="ti">${esc(d.title)}</div><div class="de">${esc(d.details)}</div></div>`).join("");
+}
+
+/* ---------- interactions ---------- */
+function bind(){
+  document.getElementById("tabs").addEventListener("click",e=>{
+    const t=e.target.closest(".tab"); if(!t)return;
+    if(t.dataset.view==="roadmap" && !document.body.classList.contains("show-internal")){
+      document.getElementById("internalToggle").checked=true; setInternal(true);
+    }
+    filters.view=t.dataset.view; apply();
+  });
+  document.getElementById("q").addEventListener("input",e=>{filters.q=e.target.value;renderAgents();writeHash();});
+  document.getElementById("fCategory").addEventListener("change",e=>{filters.cat=e.target.value||null;renderAgents();writeHash();});
+  document.getElementById("fIndustry").addEventListener("change",e=>{filters.industry=e.target.value||null;renderAgents();writeHash();});
+  document.getElementById("fStatus").addEventListener("change",e=>{filters.status=e.target.value||null;renderAgents();writeHash();});
+  document.getElementById("clearFilters").addEventListener("click",()=>{filters.q="";document.getElementById("q").value="";filters.status=filters.cat=filters.industry=null;apply();});
+  document.getElementById("gridViewBtn").addEventListener("click",()=>{filters.layout="grid";renderAgents();writeHash();});
+  document.getElementById("tableViewBtn").addEventListener("click",()=>{filters.layout="table";renderAgents();writeHash();});
+  document.getElementById("detailClose").addEventListener("click",closeDetail);
+  document.getElementById("overlay").addEventListener("click",closeDetail);
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeDetail(); });
+  document.getElementById("internalToggle").addEventListener("change",e=>setInternal(e.target.checked));
+  document.getElementById("printBtn").addEventListener("click",()=>window.print());
+  document.getElementById("csvBtn").addEventListener("click",exportCsv);
+  document.getElementById("refreshBtn").addEventListener("click",()=>document.getElementById("drop").classList.toggle("show"));
+  document.getElementById("themeBtn").addEventListener("click",()=>{
+    const light=document.documentElement.getAttribute("data-theme")==="light";
+    setTheme(light?"dark":"light");
+  });
+  setupDropzone();
+  syncThemeButton();
+}
+function setTheme(t){
+  if(t==="light") document.documentElement.setAttribute("data-theme","light");
+  else document.documentElement.removeAttribute("data-theme");
+  try{ localStorage.setItem("theme",t); }catch(e){}
+  syncThemeButton();
+}
+function syncThemeButton(){
+  const light=document.documentElement.getAttribute("data-theme")==="light";
+  const btn=document.getElementById("themeBtn");
+  if(btn) btn.textContent = light ? "☀ Light" : "🌙 Dark";
+}
+function setInternal(on){
+  document.body.classList.toggle("show-internal",on);
+  document.querySelectorAll(".internal-tab").forEach(t=>t.classList.toggle("hide",!on));
+  if(!on && filters.view==="roadmap"){ filters.view="agents"; apply(); } else { writeHash(); }
+}
+
+/* ---------- URL hash (shareable filtered views) ---------- */
+function writeHash(){
+  const p=new URLSearchParams();
+  if(filters.view!=="agents")p.set("view",filters.view);
+  if(filters.q)p.set("q",filters.q);
+  if(filters.status)p.set("status",filters.status);
+  if(filters.cat)p.set("cat",filters.cat);
+  if(filters.industry)p.set("industry",filters.industry);
+  if(filters.layout!=="grid")p.set("layout",filters.layout);
+  if(filters.agent)p.set("agent",filters.agent);
+  if(document.body.classList.contains("show-internal"))p.set("internal","1");
+  const str=p.toString();
+  history.replaceState(null,"",str?("#"+str):location.pathname+location.search);
+}
+function readHash(){
+  const p=new URLSearchParams(location.hash.slice(1));
+  if(p.get("internal")==="1"){document.getElementById("internalToggle").checked=true;setInternal(true);}
+  filters.view=p.get("view")||"agents";
+  filters.q=p.get("q")||""; document.getElementById("q").value=filters.q;
+  filters.status=p.get("status")||null; filters.cat=p.get("cat")||null; filters.industry=p.get("industry")||null;
+  filters.layout=p.get("layout")||"grid";
+  const ag=p.get("agent"); if(ag) setTimeout(()=>openDetail(ag),0);
+}
+
+/* ---------- CSV export of current filtered set ---------- */
+function exportCsv(){
+  const internal=document.body.classList.contains("show-internal");
+  const cols=["id","name","categoryName","industries","businessFunction","problem","before","after","metric","metricValue","status"];
+  if(internal) cols.push("internalComment");
+  const head=cols.join(",");
+  const rows=filteredAgents().map(a=>cols.map(c=>csvCell(c==="industries"?agentIndustries(a).join("; "):a[c])).join(","));
+  download("manifest-ai-agents.csv",[head,...rows].join("\n"));
+}
+function csvCell(v){ v=v==null?"":String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function download(name,text){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([text],{type:"text/csv"})); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+/* ---------- in-browser xlsx upload ---------- */
+function setupDropzone(){
+  const drop=document.getElementById("drop"), input=document.getElementById("fileInput");
+  ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("hot");}));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("hot");}));
+  drop.addEventListener("drop",e=>{ if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+  input.addEventListener("change",e=>{ if(e.target.files[0]) loadFile(e.target.files[0]); });
+}
+async function loadFile(file){
+  try{
+    const buf=await file.arrayBuffer();
+    const sheets=await Xlsx.readSheets(buf);
+    const data=normalizeWorkbook(sheets);
+    data.meta.sourceFile=file.name+" (preview)";
+    init(data);
+    document.getElementById("drop").classList.remove("show");
+    banner(`Previewing <b>${esc(file.name)}</b> — ${data.agents.length} agents loaded in-browser. Reload the page to return to the published data.`);
+  }catch(err){ banner("Could not read that file: "+esc(err.message),true); }
+}
+function banner(html,err){
+  const b=document.getElementById("banner");
+  b.className="banner show"; if(err)b.style.borderColor="#f87171";
+  b.innerHTML=html+'<button onclick="this.parentNode.classList.remove(\'show\')">dismiss</button>';
+}
+
+function esc(v){ return v==null?"":String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+/* ---------- boot ---------- */
+bind();
+init(window.__DATA__);
+</script>
+</body>
+</html>
