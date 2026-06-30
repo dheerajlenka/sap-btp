@@ -433,6 +433,18 @@ const s=v=>{ if(v==null) return ""; let t=String(v).trim();
   if(t.indexOf("Deep")>=0){ t=t.replace(/\s*\bDeep(?:Delve|Probe)\b\s*/g," ").trim();
     const m=t.match(/^\((.*)\)$/); if(m) t=m[1].trim(); }
   return t; };
+// Mirrors INDUSTRY_MAP / consolidate_industries in build/convert.py.
+const INDUSTRY_MAP={"Banking":"Banking & Financial Services","Lending":"Banking & Financial Services",
+  "Mortgage Lending":"Banking & Financial Services","Commercial Lending":"Banking & Financial Services",
+  "Fintech":"Banking & Financial Services","Financial Services":"Banking & Financial Services",
+  "Superannuation":"Banking & Financial Services","Government Finance":"Banking & Financial Services",
+  "Government":"Government & Public Sector","Defense":"Government & Public Sector","Public Health":"Government & Public Sector",
+  "National Programs":"Government & Public Sector","Development Projects":"Government & Public Sector",
+  "Media":"Media & Entertainment","Broadcasting":"Media & Entertainment","Digital Media":"Media & Entertainment",
+  "Publishing":"Media & Entertainment","Content Creation":"Media & Entertainment",
+  "Manufacturing":"Manufacturing & Resources","Mining":"Manufacturing & Resources",
+  "Multi-sector Enterprise":"Cross-Industry","Multi-sector Coordination":"Cross-Industry"};
+const consolidateIndustries=raw=>{ const out=[]; raw.forEach(i=>{const x=INDUSTRY_MAP[i]||i; if(!out.includes(x))out.push(x);}); return out; };
 function normMetric(raw){
   if(raw==null) return ["",null];
   if(typeof raw==="number"){ if(raw>0&&raw<=1){const p=Math.round(raw*100);return [p+"%",p];} return [String(raw),null]; }
@@ -499,7 +511,7 @@ function normalizeWorkbook(sheets){
     const deps=deployments[cid]||[];
     const status=deps.length?depStatus(deps.map(d=>d.client+" "+d.details).join(" ")):"Planned";
     return {id:cid,name:catNames[cid]||mdNames[cid]||cid,
-      industries:industries[cid]||[],deployments:deps,agentCount:byCat[cid]||0,status};
+      industries:consolidateIndustries(industries[cid]||[]),deployments:deps,agentCount:byCat[cid]||0,status};
   });
   const look={}; categories.forEach(c=>look[c.id]=c);
   agents.forEach(a=>{const c=look[a.categoryId]; a.status=c?c.status:"Planned";});

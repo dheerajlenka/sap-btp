@@ -3,7 +3,7 @@
     "title": "Manifest AI Workspace 3.0 Agent Hub",
     "subtitle": "Enterprise Agentic AI",
     "contact": "www.manifestai.com",
-    "generatedAt": "29 Jun 2026",
+    "generatedAt": "30 Jun 2026",
     "sourceFile": "Manifest_AI_Agents_Inventory.xlsx",
     "kpis": [
       {
@@ -96,11 +96,8 @@
       "id": "CAT-01",
       "name": "Document Intelligence & Extraction",
       "industries": [
-        "Banking",
-        "Lending",
-        "Financial Services",
-        "Manufacturing",
-        "Superannuation"
+        "Banking & Financial Services",
+        "Manufacturing & Resources"
       ],
       "deployments": [
         {
@@ -131,11 +128,7 @@
       "id": "CAT-02",
       "name": "Financial Analysis & Underwriting",
       "industries": [
-        "Banking",
-        "Mortgage Lending",
-        "Commercial Lending",
-        "Superannuation",
-        "Government Finance"
+        "Banking & Financial Services"
       ],
       "deployments": [
         {
@@ -162,11 +155,8 @@
       "id": "CAT-03",
       "name": "Billing & Reconciliation Automation",
       "industries": [
-        "Banking",
-        "Fintech",
-        "Superannuation",
-        "Manufacturing",
-        "Financial Services"
+        "Banking & Financial Services",
+        "Manufacturing & Resources"
       ],
       "deployments": [
         {
@@ -193,11 +183,10 @@
       "id": "CAT-04",
       "name": "Knowledge Discovery & Search",
       "industries": [
-        "Government",
-        "Defense",
-        "Mining",
-        "Media",
-        "Multi-sector Enterprise"
+        "Government & Public Sector",
+        "Manufacturing & Resources",
+        "Media & Entertainment",
+        "Cross-Industry"
       ],
       "deployments": [
         {
@@ -224,11 +213,7 @@
       "id": "CAT-05",
       "name": "Content Intelligence & Media",
       "industries": [
-        "Media",
-        "Publishing",
-        "Content Creation",
-        "Digital Media",
-        "Broadcasting"
+        "Media & Entertainment"
       ],
       "deployments": [
         {
@@ -247,11 +232,8 @@
       "id": "CAT-06",
       "name": "Government & Program Management",
       "industries": [
-        "Government",
-        "Public Health",
-        "National Programs",
-        "Development Projects",
-        "Multi-sector Coordination"
+        "Government & Public Sector",
+        "Cross-Industry"
       ],
       "deployments": [
         {

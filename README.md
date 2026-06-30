@@ -79,6 +79,10 @@ Notes / caveats:
 
 - Categories `CAT-10` (Construction & Field Operations) and `CAT-11` (Procurement &
   Supply Chain) are not in `Master Data`; they are picked up from `Agent Inventory Live`.
+- The workbook's raw industries are consolidated into standard sectors (Banking &
+  Financial Services, Government & Public Sector, Media & Entertainment, Manufacturing
+  & Resources, Cross-Industry) via `INDUSTRY_MAP` in `build/convert.py`. Edit that map
+  to change the groupings; the source spreadsheet is left untouched.
 - The **Internal view toggle is cosmetic, not a security boundary** — anyone can edit the
   URL. Keep genuinely sensitive notes out of the workbook columns that feed the dashboard.
 

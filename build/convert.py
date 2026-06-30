@@ -27,6 +27,45 @@ DEFAULT_OUT = "data/data.json"
 LIVE_HINTS = ("user", "client", "document", "progress", "live")
 PLANNED_HINTS = ("to be deployed", "in development", "tbd", "planned")
 
+# Consolidate the raw, overlapping industry values from the workbook into a
+# small set of standard sectors. The source sheet is left untouched; this only
+# affects how industries are presented/filtered in the dashboard. Any industry
+# not listed here passes through unchanged.
+INDUSTRY_MAP = {
+    "Banking": "Banking & Financial Services",
+    "Lending": "Banking & Financial Services",
+    "Mortgage Lending": "Banking & Financial Services",
+    "Commercial Lending": "Banking & Financial Services",
+    "Fintech": "Banking & Financial Services",
+    "Financial Services": "Banking & Financial Services",
+    "Superannuation": "Banking & Financial Services",
+    "Government Finance": "Banking & Financial Services",
+    "Government": "Government & Public Sector",
+    "Defense": "Government & Public Sector",
+    "Public Health": "Government & Public Sector",
+    "National Programs": "Government & Public Sector",
+    "Development Projects": "Government & Public Sector",
+    "Media": "Media & Entertainment",
+    "Broadcasting": "Media & Entertainment",
+    "Digital Media": "Media & Entertainment",
+    "Publishing": "Media & Entertainment",
+    "Content Creation": "Media & Entertainment",
+    "Manufacturing": "Manufacturing & Resources",
+    "Mining": "Manufacturing & Resources",
+    "Multi-sector Enterprise": "Cross-Industry",
+    "Multi-sector Coordination": "Cross-Industry",
+}
+
+
+def consolidate_industries(raw):
+    """Map raw industries to standard sectors, de-duplicated, order preserved."""
+    out = []
+    for i in raw:
+        sector = INDUSTRY_MAP.get(i, i)
+        if sector not in out:
+            out.append(sector)
+    return out
+
 
 # Retired sub-brand names that must not surface anywhere in the dashboard.
 _RETIRED_BRANDS = re.compile(r"\s*\bDeep(?:Delve|Probe)\b\s*")
@@ -215,7 +254,7 @@ def build(xlsx_path):
         categories.append({
             "id": cid,
             "name": inv_cat_names.get(cid) or md_cat_names.get(cid, cid),
-            "industries": industries.get(cid, []),
+            "industries": consolidate_industries(industries.get(cid, [])),
             "deployments": deps,
             "agentCount": agents_by_cat.get(cid, 0),
             "status": status,
